@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-
 # process command line arguments to get a specific system config, if desired
-spack_system_cfg="spack_fsl.cfg"
+spack_system_cfg="default.cfg"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -20,8 +19,8 @@ done
 #----------------------------------------------------------------------------
 # environment
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/${spack_system_cfg} ] && . ${SCRIPTDIR}/${spack_system_cfg} || \
-	{ echo "cannot locate ${SCRIPTDIR}/${spack_system_cfg}"; exit 1; }
+[ -f ${SCRIPTDIR}/conf/${spack_system_cfg} ] && . ${SCRIPTDIR}/conf/${spack_system_cfg} || \
+	{ echo "cannot locate ${SCRIPTDIR}/conf/${spack_system_cfg}"; exit 1; }
 #----------------------------------------------------------------------------
 
 mkdir -p ~/.spack/
@@ -177,6 +176,6 @@ my_spack_update_buildcache()
 cd ${spack_clone_path} && pwd && . share/spack/setup-env.sh || exit 1
 
 [ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add mysrcmirror ${spack_source_cache}
-[ -d ${spack_build_cache}/build_cache/    ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
+[ -d ${spack_build_cache}                 ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
 
 echo "Finished initalization from ${SCRIPTDIR}/spack_setup.sh"

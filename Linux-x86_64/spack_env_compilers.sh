@@ -16,6 +16,7 @@ echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
 cat >${spack_yaml} <<EOF
 spack:
   config:
+    source_cache: ${spack_source_cache}
     build_stage: ${spack_build_stage_path}
     install_tree:
       root: ${spack_clone_path}/${spack_env}
@@ -31,8 +32,8 @@ spack:
       projections:
         all: '{name}/{version}'
       link: roots
-      link_type: hardlink
-      #link_type: symlink # python breaks with hardlinks in view setup
+      #link_type: hardlink
+      link_type: symlink # python breaks with hardlinks in view setup
 
   modules:
     default:
@@ -98,9 +99,13 @@ spack env remove -y ${spack_env} 2>/dev/null
 spack mark --all --implicit
 spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
 spack env activate ${spack_env}
-spack config blame concretizer && spack config blame config # show our current configuration, with what comes from where
+spack external find --not-buildable openssl ncurses #perl
+spack compiler find && spack compilers
+spack config blame concretizer && \
+    spack config blame packages && \
+    spack config blame config # show our current configuration, with what comes from where
 
-spack concretize \
+spack concretize --fresh \
     || exit 1
 
 # run a number of installs in the background
@@ -120,14 +125,15 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-      aocc+license-agreed %${spack_core_compiler} \
-      intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
       llvm@15.0.4+flang %${spack_core_compiler} \
       nvhpc@22.9 %${spack_core_compiler} \
-      cuda@6.5 %${spack_core_compiler} \
       cuda@11 %${spack_core_compiler} \
     && spack concretize \
 	|| exit 1
+
+#      aocc+license-agreed %${spack_core_compiler} \
+#      intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
+
 
 # run a number of installs in the background
 for bg_inst in $(seq 1 ${n_concurrent_installs}); do
