@@ -180,7 +180,7 @@ spack:
     - tar@1.34
     - tcl
     - tcsh
-    - tecplot
+    #- tecplot
     - texlive
     - tk
     - tmux
@@ -198,7 +198,8 @@ spack env remove -y ${spack_env} 2>/dev/null
 spack mark --all --implicit
 spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
 spack env activate ${spack_env}
-spack config blame concretizer && spack config blame config # show our current configuration, with what comes from where
+spack external find --not-buildable openssl ncurses #perl
+spack config blame concretizer && spack config blame packages && spack config blame config # show our current configuration, with what comes from where
 spack compilers
 
 # occasionally, packages fail download with
@@ -215,10 +216,13 @@ spack compilers
     && spack mirror add my_mirror file://${HOME}/.spack/my_mirror \
     && spack mirror list
 
-spack concretize \
+spack concretize --fresh \
     || exit 1
 
 #exit 1
+
+# populate our source cache mirror
+spack mirror create --directory ${spack_source_cache} --all
 
 # run a number of installs in the background
 for bg_inst in $(seq 1 ${n_concurrent_installs}); do

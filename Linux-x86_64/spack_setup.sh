@@ -71,7 +71,7 @@ EOF
 type module >/dev/null 2>&1 \
     && module purge && module list \
     && module unuse ${MODULEPATH} \
-    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH module \
+    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES module \
     && env | grep MODU | sort
 
 # shell function to clean/refresh module tree,
@@ -94,7 +94,7 @@ cat >~/spack_modules.sh <<EOF
 type module >/dev/null 2>&1 \\
     && module purge \\
     && module unuse \${MODULEPATH} \\
-    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH module \\
+    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES module \
     && env | grep MODU | sort
 
 # use the spack-provided lmod & module tree.  spack defaults to TCL modules, so swap for Lmod.
@@ -177,5 +177,8 @@ cd ${spack_clone_path} && pwd && . share/spack/setup-env.sh || exit 1
 
 [ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add mysrcmirror ${spack_source_cache}
 [ -d ${spack_build_cache}                 ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
+
+which python
+which python3
 
 echo "Finished initalization from ${SCRIPTDIR}/spack_setup.sh"

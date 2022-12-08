@@ -108,6 +108,9 @@ spack config blame concretizer && \
 spack concretize --fresh \
     || exit 1
 
+# populate our source cache mirror
+spack mirror create --directory ${spack_source_cache} --all
+
 # run a number of installs in the background
 for bg_inst in $(seq 1 ${n_concurrent_installs}); do
     spack install ${spack_install_flags} &
@@ -125,14 +128,18 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-      llvm@15.0.4+flang %${spack_core_compiler} \
-      nvhpc@22.9 %${spack_core_compiler} \
-      cuda@11 %${spack_core_compiler} \
+    aocc+license-agreed %${spack_core_compiler} \
+    llvm@15.0.4+flang %${spack_core_compiler} \
+    nvhpc@22.9 %${spack_core_compiler} \
+    cuda@11 %${spack_core_compiler} \
     && spack concretize \
 	|| exit 1
 
-#      aocc+license-agreed %${spack_core_compiler} \
-#      intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
+# intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
+
+# populate our source cache mirror
+spack mirror create --directory ${spack_source_cache} --all
+
 
 
 # run a number of installs in the background
