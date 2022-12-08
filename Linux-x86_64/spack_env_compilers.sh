@@ -129,13 +129,13 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
     aocc+license-agreed %${spack_core_compiler} \
+    intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
     llvm@15.0.4+flang %${spack_core_compiler} \
     nvhpc@22.9 %${spack_core_compiler} \
     cuda@11 %${spack_core_compiler} \
     && spack concretize \
 	|| exit 1
 
-# intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all

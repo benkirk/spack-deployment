@@ -178,7 +178,4 @@ cd ${spack_clone_path} && pwd && . share/spack/setup-env.sh || exit 1
 [ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add mysrcmirror ${spack_source_cache}
 [ -d ${spack_build_cache}                 ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
 
-which python
-which python3
-
 echo "Finished initalization from ${SCRIPTDIR}/spack_setup.sh"
