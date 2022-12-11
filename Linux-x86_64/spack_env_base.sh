@@ -30,7 +30,7 @@ spack:
       projections:
         all: '{name}/{version}'
       link: roots
-      link_type: hardlink
+      link_type: symlink
 
   modules:
     default::
@@ -123,7 +123,7 @@ spack:
     - diffutils
     - doxygen+graphviz
     - eigen
-    - emacs+X+tls toolkit=gtk
+    - emacs+X+tls toolkit=gtk ^gnutls@3.6.15^nettle@3.4.1 # why so specific?  latest gnutls+nettle fails inside nettle with an OpenSSL incompatibility
     - findutils
     - flex
     - gawk
@@ -136,14 +136,15 @@ spack:
     - gnuplot+X
     - go@1.18 # required for podman, might as well install it as a root spec and get a module for it...
     - hwloc
-    #- imagemagick@7.0.8-7 ^librsvg@2.40.20 # the librsvg dependency had build issues, so cowardly fall back to the OS version (specified above as an 'external')
+    - imagemagick@7.0.8-7 ^librsvg@2.40.20 # the librsvg dependency had build issues, so cowardly fall back to the OS version (specified above as an 'external')
     - intel-oneapi-mkl
     - intel-oneapi-tbb
     - julia@1.7 ^llvm@12.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     - julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     - less
     - libfuse
-    #- librsvg@2.44.14 ^libxml2+python@3.9
+    #- librsvg@2.44.14
+    - librsvg@2.50.2
     - libszip
     - libtool@2.4.7
     - libxml2
@@ -198,8 +199,10 @@ spack env remove -y ${spack_env} 2>/dev/null
 spack mark --all --implicit
 spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
 spack env activate ${spack_env}
-spack external find --not-buildable openssl ncurses #perl
-spack config blame concretizer && spack config blame packages && spack config blame config # show our current configuration, with what comes from where
+#spack external find --not-buildable openssl ncurses #perl
+for arg in repos mirrors concretizer packages config modules compilers; do
+    spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
+done
 spack compilers
 
 # occasionally, packages fail download with
@@ -226,7 +229,7 @@ spack mirror create --directory ${spack_source_cache} --all
 
 # run a number of installs in the background
 for bg_inst in $(seq 1 ${n_concurrent_installs}); do
-    spack install ${spack_install_flags} &
+    spack install ${spack_install_flags} || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
 done
 # run a single install in the foreground.  try with our build flags, which could use a binary cache,
 # but fall back to a --no-cache attempt if necessary

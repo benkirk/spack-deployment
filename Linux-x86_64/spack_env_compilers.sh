@@ -99,11 +99,11 @@ spack env remove -y ${spack_env} 2>/dev/null
 spack mark --all --implicit
 spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
 spack env activate ${spack_env}
-spack external find --not-buildable openssl ncurses #perl
+#spack external find --not-buildable openssl ncurses #perl
 spack compiler find && spack compilers
-spack config blame concretizer && \
-    spack config blame packages && \
-    spack config blame config # show our current configuration, with what comes from where
+for arg in repos mirrors concretizer packages config modules compilers; do
+    spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
+done
 
 spack concretize --fresh \
     || exit 1
@@ -113,7 +113,7 @@ spack mirror create --directory ${spack_source_cache} --all
 
 # run a number of installs in the background
 for bg_inst in $(seq 1 ${n_concurrent_installs}); do
-    spack install ${spack_install_flags} &
+    spack install ${spack_install_flags} || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
 done
 # run a single install in the foreground.  try with our build flags, which could use a binary cache,
 # but fall back to a --no-cache attempt if necessary
@@ -128,14 +128,14 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-    aocc+license-agreed %${spack_core_compiler} \
     intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
     llvm@15.0.4+flang %${spack_core_compiler} \
     nvhpc@22.9 %${spack_core_compiler} \
     cuda@11 %${spack_core_compiler} \
-    && spack concretize \
+    && spack concretize --fresh \
 	|| exit 1
 
+#     aocc+license-agreed %${spack_core_compiler} \
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all
@@ -144,7 +144,7 @@ spack mirror create --directory ${spack_source_cache} --all
 
 # run a number of installs in the background
 for bg_inst in $(seq 1 ${n_concurrent_installs}); do
-    spack install ${spack_install_flags} &
+    spack install ${spack_install_flags} || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
 done
 # run a single install in the foreground.  try with our build flags, which could use a binary cache,
 # but fall back to a --no-cache attempt if necessary
