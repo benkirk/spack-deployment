@@ -77,7 +77,7 @@ spack:
                CFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
                FCFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
                FFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               LDFLAGS: '-Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64'
+               LDFLAGS: '-L${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64 -Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64'
 
         projections:
           all: '{name}/{version}'
