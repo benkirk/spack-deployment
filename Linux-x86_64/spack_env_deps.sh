@@ -75,6 +75,8 @@ spack:
         exclude:
           - '%${spack_system_compiler}'
           - lmod
+        core_compilers:
+          - ${spack_core_compiler}
         all:
           environment:
             set:
@@ -113,6 +115,32 @@ spack:
         cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/g++
         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
+      flags: {}
+      operating_system: centos7
+      target: x86_64
+      modules: []
+      environment: {}
+      extra_rpaths: []
+  - compiler:
+      spec: gcc@10.4.0
+      paths:
+        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gcc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/g++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
+      flags: {}
+      operating_system: centos7
+      target: x86_64
+      modules: []
+      environment: {}
+      extra_rpaths: []
+  - compiler:
+      spec: gcc@9.5.0
+      paths:
+        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gcc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/g++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
       flags: {}
       operating_system: centos7
       target: x86_64
@@ -217,6 +245,8 @@ spack:
   - gcc_compilers:
     - gcc@12.2.0
     - gcc@11.3.0
+    - gcc@10.4.0
+    - gcc@9.5.0
 
   - oneapi_compilers:
     - oneapi@2022.2.1
@@ -274,13 +304,24 @@ EOF
 
 unset MPIS COMPS SPKGS PPKGS
 MPIS=('mpich@4.0.2+slurm' 'openmpi@4.1.4+legacylaunchers schedulers=slurm')
-COMPS=('gcc@11.3.0' 'gcc@12.2.0' 'oneapi@2022.2.1' 'nvhpc@22.9')
+COMPS=('gcc@9.5.0' 'gcc@10.4.0' 'gcc@11.3.0' 'gcc@12.2.0' 'oneapi@2022.2.1' 'nvhpc@22.9')
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp')
 PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks@6.2')
 for comp in "${COMPS[@]}"; do
     for spkg in "${SPKGS[@]}"; do
         echo "    - $spkg %$comp" >> ${spack_yaml}
     done
+    for mpi in "${MPIS[@]}"; do
+        echo "    - $mpi %$comp" >> ${spack_yaml}
+        for ppkg in "${PPKGS[@]}"; do
+            echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}
+        done
+    done
+done
+
+COMPS=('gcc@9.5.0' 'gcc@10.4.0' 'gcc@11.3.0' 'gcc@12.2.0')
+PPKGS=('mpifileutils+gpfs+lustre+xattr')
+for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do
         echo "    - $mpi %$comp" >> ${spack_yaml}
         for ppkg in "${PPKGS[@]}"; do

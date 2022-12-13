@@ -48,6 +48,8 @@ spack:
         include:
           - gcc@12.2.0
           - gcc@11.3.0
+          - gcc@10.4.0
+          - gcc@9.5.0
         core_compilers:
           - ${spack_core_compiler}
         core_specs:
@@ -105,7 +107,7 @@ spack:
 
   specs:
 
-    - anaconda2
+    #- anaconda2
     - anaconda3
     - apptainer~suid ^go@1.18
     - autoconf-archive
@@ -144,17 +146,19 @@ spack:
     - less
     - libfuse
     #- librsvg@2.44.14
-    - librsvg@2.50.2
+    #- librsvg@2.50.2
     - libszip
     - libtool@2.4.7
+    #- miniconda2
     - libxml2
     - lmod
     - m4@1.4.19
     - mercurial
-    - miniconda2
+    - meson
     - miniconda3
     - mutationpp
     - ncurses
+    - ninja
     - numactl
     - openjdk
     - openssh

@@ -93,6 +93,8 @@ spack:
     - lmod        %${spack_system_compiler}
     - gcc@12.2.0  %${spack_system_compiler}
     - gcc@11.3.0  %${spack_system_compiler}
+    - gcc@10.4.0  %${spack_system_compiler}
+    - gcc@9.5.0   %${spack_system_compiler}
 EOF
 
 spack env remove -y ${spack_env} 2>/dev/null
@@ -128,6 +130,7 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
+    aocc+license-agreed %${spack_core_compiler} \
     intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
     llvm@15.0.4+flang %${spack_core_compiler} \
     nvhpc@22.9 %${spack_core_compiler} \
@@ -135,12 +138,8 @@ spack add \
     && spack concretize --fresh \
 	|| exit 1
 
-#     aocc+license-agreed %${spack_core_compiler} \
-
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all
-
-
 
 # run a number of installs in the background
 for bg_inst in $(seq 1 ${n_concurrent_installs}); do
