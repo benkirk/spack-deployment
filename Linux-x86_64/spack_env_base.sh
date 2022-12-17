@@ -147,7 +147,6 @@ spack:
     - less
     - libfuse
     - librsvg@2.40.21
-    - librsvg@2.44.14
     - librsvg@2.50.2
     - librsvg@2.51.0
     - libszip
