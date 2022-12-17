@@ -32,8 +32,7 @@ spack:
       projections:
         all: '{name}/{version}'
       link: roots
-      #link_type: hardlink
-      link_type: symlink # python breaks with hardlinks in view setup
+      link_type: symlink
 
   modules:
     default:
@@ -130,13 +129,14 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-    aocc+license-agreed %${spack_core_compiler} \
     intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
-    llvm@15.0.4+flang %${spack_core_compiler} \
+    llvm@15.0.4+flang+cuda cuda_arch=80 %${spack_core_compiler} \
     nvhpc@22.9 %${spack_core_compiler} \
     cuda@11 %${spack_core_compiler} \
     && spack concretize --fresh \
 	|| exit 1
+
+#     aocc+license-agreed %${spack_core_compiler} \
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all

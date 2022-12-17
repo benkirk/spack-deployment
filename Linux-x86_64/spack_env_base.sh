@@ -96,11 +96,11 @@ spack:
       extra_rpaths: []
 
   packages:
-    librsvg:
-      #buildable: False
-      externals:
-      - spec: librsvg@2.40.20
-        prefix: /usr
+    # librsvg:
+    #   #buildable: False
+    #   externals:
+    #   - spec: librsvg@2.40.20
+    #     prefix: /usr
     all:
       compiler: [${spack_core_compiler}]
       variants: [~mpi, +fortran] # make sure mpi doesn't sneak in through hdf5 (to paraview), or any sub-package.  enable fortran where applicable.
@@ -108,7 +108,7 @@ spack:
   specs:
 
     #- anaconda2
-    - anaconda3
+    #- anaconda3
     - apptainer~suid ^go@1.18
     - autoconf-archive
     - autoconf@2.69
@@ -133,28 +133,31 @@ spack:
     - gdbm
     - gettext
     - git
+    - gimp ^librsvg@2.40.21 ^gnutls@3.6.8 ^nettle@3.4.1 ^libproxy~python
     - gmake@4.3
     - gmsh+eigen+openmp
     - gnuplot+X
     - go@1.18 # required for podman, might as well install it as a root spec and get a module for it...
     - hwloc
-    - imagemagick@7.0.8-7 ^librsvg@2.40.20 # the librsvg dependency had build issues, so cowardly fall back to the OS version (specified above as an 'external')
+    - imagemagick@7.0.8-7 ^librsvg@2.40.21 # the librsvg dependency had build issues, so cowardly fall back to the OS version (specified above as an 'external')
     - intel-oneapi-mkl
     - intel-oneapi-tbb
     - julia@1.7 ^llvm@12.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     - julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     - less
     - libfuse
-    #- librsvg@2.44.14
-    #- librsvg@2.50.2
+    - librsvg@2.40.21
+    - librsvg@2.44.14
+    - librsvg@2.50.2
+    - librsvg@2.51.0
     - libszip
     - libtool@2.4.7
-    #- miniconda2
     - libxml2
     - lmod
     - m4@1.4.19
     - mercurial
     - meson
+    #- miniconda2
     - miniconda3
     - mutationpp
     - ncurses
