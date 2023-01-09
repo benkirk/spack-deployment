@@ -120,6 +120,7 @@ spack:
     - bzip2
     - cantera ^intel-oneapi-mkl # 95% of the time just 'cantera' went off without a hitch in my experimentation.  then it tried to use nvhpc for BLAS & failed.  don't let it, manually specify mkl.
     - cgns
+    - charliecloud+squash^libfuse~utils
     - cmake@3.24
     - curl
     - diffutils
@@ -170,7 +171,7 @@ spack:
     - pdsh
     - perl%${spack_core_compiler} # perl also gets built with older gcc via julia above, so fully specify so this makes it into the 'root' of our environment.
     - pkgconf
-    - podman ^go@1.18
+    - podman@4 ^go@1.18
     - qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
     - r@4.2+X+rmath
     - readline
@@ -178,6 +179,8 @@ spack:
     - ruby
     - scons
     - screen
+    - singularityce~suid ^go@1.18
+    - slirp4netns
     - slurm
     - sqlite
     - squashfs
