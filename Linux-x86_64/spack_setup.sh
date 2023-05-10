@@ -45,8 +45,8 @@ cat > ~/.spack/config.yaml <<EOF
 config:
   db_lock_timeout: 10
   url_fetch_method: curl
-  install_tree:
-    padded_length: 128
+  # install_tree:
+  #   padded_length: 128
 
 EOF
 
@@ -69,7 +69,7 @@ EOF
 # spack supports Lmod, but having Lmod in our shell environment *before* invoking spack is a recipe for trouble.
 # below is an attempt to 'sanitize' our shell from the broader FSL Lmod
 type module >/dev/null 2>&1 \
-    && module purge && module list \
+    && module --force purge && module list \
     && module unuse ${MODULEPATH} \
     && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES module \
     && env | grep MODU | sort
@@ -87,12 +87,12 @@ my_spack_refresh_lmod()
         && module use ${spack_lmod_root}/Core \
         && module avail
 
-cat >~/spack_modules.sh <<EOF
+cat >~/spack_modules_${spack_deployment}.sh <<EOF
 # To use this module stack do the following:
 
 # remove any existing module implementation fron the current shell, as much as possible
 type module >/dev/null 2>&1 \\
-    && module purge \\
+    && module --force purge \\
     && module unuse \${MODULEPATH} \\
     && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES module \
     && env | grep MODU | sort
@@ -104,7 +104,7 @@ type module >/dev/null 2>&1 \\
     && module use ${spack_lmod_root}/Core \\
     && module avail
 EOF
-cat ~/spack_modules.sh
+cat ~/spack_modules_${spack_deployment}.sh
 }
 
 
