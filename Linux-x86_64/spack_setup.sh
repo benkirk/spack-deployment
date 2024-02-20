@@ -70,7 +70,7 @@ my_spack_refresh_lmod()
 
     spack module lmod refresh $@ \
         && . $(spack location -i lmod)/lmod/lmod/init/bash \
-        && . share/spack/setup-env.sh \
+        && . ${spack_clone_path}/share/spack/setup-env.sh \
         && module unuse ${MODULEPATH} \
         && module use ${spack_lmod_root}/Core \
         && module avail

@@ -133,9 +133,9 @@ spack:
     - gdbm
     - gettext
     - git
-    #- gimp ^librsvg@2.40.21 ^gnutls@3.6.8 ^nettle@3.4.1 ^libproxy~python
+    - gimp
     - gmake
-    - gmsh+eigen+openmp
+    #- gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
     - hwloc
     - imagemagick
@@ -143,7 +143,7 @@ spack:
     - intel-oneapi-tbb
     #- julia@1.7 ^llvm@12.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     #- julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
-    - libfuse
+    #- libfuse
     - libszip
     - libtool
     - libxml2
@@ -163,7 +163,7 @@ spack:
     - pdsh
     - perl%${spack_core_compiler} # perl also gets built with older gcc via julia above, so fully specify so this makes it into the 'root' of our environment.
     - pkgconf
-    #- podman@4 ^go@1.18
+    - podman@4
     #- qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
     - r+X+rmath
     - readline
@@ -171,12 +171,11 @@ spack:
     - ruby
     - scons
     - screen
-    #- slirp4netns
     - slurm
     - sqlite
     - squashfs
     - squashfuse
-    - strace
+    #- strace
     - subversion
     - tar
     - tcl

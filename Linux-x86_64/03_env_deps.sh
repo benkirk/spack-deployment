@@ -13,17 +13,8 @@ spack_clone_path=${spack_clone_path_deps} \
 
 spack_env="${spack_deployment}-compiler-deps"
 spack_yaml="spack-${spack_env}.yaml"
+
 echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
-
-#[ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add mysrcmirror ${spack_source_cache} && spack mirror list
-#[ -d ${spack_build_cache}/build_cache/    ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
-
-# use the base root as an upstream, if different than the deps root
-[ "x${spack_clone_path_base}" != "x${spack_clone_path_deps}" ] && cat > etc/spack/upstreams.yaml <<EOF
-upstreams:
-  spack-instance-base:
-    install_tree: ${spack_clone_path_base}/${spack_deployment}-base
-EOF
 
 cat >${spack_yaml} <<EOF
 spack:
@@ -121,46 +112,45 @@ spack:
       modules: []
       environment: {}
       extra_rpaths: []
-  - compiler:
-      spec: gcc@10.4.0
-      paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
-      flags: {}
-      operating_system: ${os_version}
-      target: x86_64
-      modules: []
-      environment: {}
-      extra_rpaths: []
-  - compiler:
-      spec: gcc@9.5.0
-      paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
-      flags: {}
-      operating_system: ${os_version}
-      target: x86_64
-      modules: []
-      environment: {}
-      extra_rpaths: []
+#   - compiler:
+#       spec: gcc@10.4.0
+#       paths:
+#         cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gcc
+#         cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/g++
+#         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
+#         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
+#       flags: {}
+#       operating_system: ${os_version}
+#       target: x86_64
+#       modules: []
+#       environment: {}
+#       extra_rpaths: []
+#   - compiler:
+#       spec: gcc@9.5.0
+#       paths:
+#         cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gcc
+#         cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/g++
+#         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
+#         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
+#       flags: {}
+#       operating_system: ${os_version}
+#       target: x86_64
+#       modules: []
+#       environment: {}
+#       extra_rpaths: []
 
   - compiler:
-      spec: nvhpc@22.9
+      spec: nvhpc@23.3
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvc++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvfortran
+        cc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvc++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
       modules:
         - cuda
-      # nvhpc needs to be able to find cuda
       environment:
         prepend_path:
           PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin
@@ -170,12 +160,12 @@ spack:
       extra_rpaths: []
 
   - compiler:
-      spec: oneapi@2022.2.1
+      spec: oneapi@2023.1.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2022.2.1/compiler/latest/linux/bin/icx
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2022.2.1/compiler/latest/linux/bin/icpx
-        f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2022.2.1/compiler/latest/linux/bin/ifx
-        fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2022.2.1/compiler/latest/linux/bin/ifx
+        cc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.1.0/compiler/latest/linux/bin/icx
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.1.0/compiler/latest/linux/bin/icpx
+        f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.1.0/compiler/latest/linux/bin/ifx
+        fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.1.0/compiler/latest/linux/bin/ifx
       flags:
         # have Intel's compiler use our newer, not system gcc
         # https://spack.readthedocs.io/en/latest/getting_started.html#vendor-specific-compiler-configuration
@@ -193,22 +183,22 @@ spack:
       extra_rpaths:
         - ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64
 
-  - compiler:
-      spec: clang@15.0.4
-      paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/clang
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/clang++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
-        fc: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
-      flags: {}
-      operating_system: ${os_version}
-      target: x86_64
-      modules: []
-      environment:
-        prepend_path:
-          PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin
-      extra_rpaths:
-        - ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64
+#  - compiler:
+#      spec: clang@15.0.4
+#      paths:
+#        cc: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/clang
+#        cxx: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/clang++
+#        f77: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
+#        fc: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
+#      flags: {}
+#      operating_system: ${os_version}
+#      target: x86_64
+#      modules: []
+#      environment:
+#        prepend_path:
+#          PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin
+#      extra_rpaths:
+#        - ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64
 
 #  - compiler:
 #      spec: aocc@3.2.0
@@ -236,23 +226,23 @@ spack:
 
   definitions:
 
-  - amd_compilers:
-    - aocc@3.2.0
-
-  - clang_compilers:
-    - clang@15.0.4
+#  - amd_compilers:
+#    - aocc@3.2.0
+#
+#  - clang_compilers:
+#    - clang@15.0.4
 
   - gcc_compilers:
     - gcc@12.2.0
     - gcc@11.3.0
-    - gcc@10.4.0
-    - gcc@9.5.0
+#    - gcc@10.4.0
+#    - gcc@9.5.0
 
   - oneapi_compilers:
-    - oneapi@2022.2.1
+    - oneapi@2023.1.0
 
   - nvidia_compilers:
-    - nvhpc@22.9
+    - nvhpc@23.3
 
   - all_compilers:
     - \$amd_compilers
@@ -303,10 +293,11 @@ spack:
 EOF
 
 unset MPIS COMPS SPKGS PPKGS
-MPIS=('mpich@4.0.2+slurm' 'openmpi@4.1.4+legacylaunchers schedulers=slurm')
-COMPS=('gcc@9.5.0' 'gcc@10.4.0' 'gcc@11.3.0' 'gcc@12.2.0' 'oneapi@2022.2.1' 'nvhpc@22.9')
+MPIS=('mpich@4.1.1+slurm' 'openmpi@4.1.5+legacylaunchers schedulers=slurm')
+#COMPS=('gcc@9.5.0' 'gcc@10.4.0' 'gcc@11.3.0' 'gcc@12.2.0' 'oneapi@2023.1.0' 'nvhpc@23.3')
+COMPS=('gcc@11.3.0' 'gcc@12.2.0' 'oneapi@2023.1.0' 'nvhpc@23.3')
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp')
-PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks@6.2')
+PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'hpcg' 'osu-micro-benchmarks@7.1-1')
 for comp in "${COMPS[@]}"; do
     for spkg in "${SPKGS[@]}"; do
         echo "    - $spkg %$comp" >> ${spack_yaml}
@@ -319,8 +310,8 @@ for comp in "${COMPS[@]}"; do
     done
 done
 
-COMPS=('gcc@9.5.0' 'gcc@10.4.0' 'gcc@11.3.0' 'gcc@12.2.0')
-PPKGS=('mpifileutils+gpfs+lustre+xattr')
+COMPS=('gcc@11.3.0' 'gcc@12.2.0')
+PPKGS=('mpifileutils~gpfs+lustre+xattr')
 for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do
         echo "    - $mpi %$comp" >> ${spack_yaml}
