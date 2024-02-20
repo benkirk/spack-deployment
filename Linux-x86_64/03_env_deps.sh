@@ -103,7 +103,7 @@ spack:
         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.2.0/bin/gfortran
         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.2.0/bin/gfortran
       flags: {}
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules: []
       environment: {}
@@ -116,7 +116,7 @@ spack:
         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
       flags: {}
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules: []
       environment: {}
@@ -129,7 +129,7 @@ spack:
         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.4.0/bin/gfortran
       flags: {}
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules: []
       environment: {}
@@ -142,7 +142,7 @@ spack:
         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/9.5.0/bin/gfortran
       flags: {}
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules: []
       environment: {}
@@ -156,7 +156,7 @@ spack:
         f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvfortran
         fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvfortran
       flags: {}
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules:
         - cuda
@@ -182,12 +182,12 @@ spack:
         cflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
         cxxflags: -std=gnu++17 --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
         fflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules: []
       environment:
-        set:
-          INTEL_LICENSE_FILE: /software/x86_64/intel/license.dat
+#        set:
+#          INTEL_LICENSE_FILE: /software/x86_64/intel/license.dat
         prepend_path:
           PATH: ${spack_view_path}/${spack_deployment}-base/gmake/4.3/bin
       extra_rpaths:
@@ -201,7 +201,7 @@ spack:
         f77: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
         fc: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
       flags: {}
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules: []
       environment:
@@ -210,29 +210,29 @@ spack:
       extra_rpaths:
         - ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64
 
-  - compiler:
-      spec: aocc@3.2.0
-      paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/bin/clang
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/bin/clang++
-        f77: ${spack_view_path}/${spack_deployment}-compilers//aocc/3.2.0/bin/flang
-        fc: ${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/bin/flang
-      flags:
-        # have AMD's compiler use our newer, not system gcc
-        # https://spack.readthedocs.io/en/latest/getting_started.html#vendor-specific-compiler-configuration
-        cflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
-        cxxflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
-        fflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
-        # fix for d.lld: error: lib/.libs/libmpi.so: undefined reference to ceilf
-        ldflags: -lm
-      operating_system: centos7
-      target: x86_64
-      modules: []
-      environment:
-        prepend_path:
-          PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin
-      extra_rpaths:
-        - ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64
+#  - compiler:
+#      spec: aocc@3.2.0
+#      paths:
+#        cc: ${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/bin/clang
+#        cxx: ${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/bin/clang++
+#        f77: ${spack_view_path}/${spack_deployment}-compilers//aocc/3.2.0/bin/flang
+#        fc: ${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/bin/flang
+#      flags:
+#        # have AMD's compiler use our newer, not system gcc
+#        # https://spack.readthedocs.io/en/latest/getting_started.html#vendor-specific-compiler-configuration
+#        cflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
+#        cxxflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
+#        fflags: --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0
+#        # fix for d.lld: error: lib/.libs/libmpi.so: undefined reference to ceilf
+#        ldflags: -lm
+#      operating_system: ${os_version}
+#      target: x86_64
+#      modules: []
+#      environment:
+#        prepend_path:
+#          PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin
+#      extra_rpaths:
+#        - ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64
 
   definitions:
 

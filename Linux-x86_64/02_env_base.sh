@@ -9,7 +9,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 spack_env="${spack_deployment}-base"
 spack_yaml="spack-${spack_env}.yaml"
-#spack_lmod_root=${spack_clone_path}/share/spack/lmod/${spack_env}
+
 echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
 
 cat >${spack_yaml} <<EOF
@@ -46,10 +46,11 @@ spack:
           - '%${spack_system_compiler}'
           - lmod
         include:
-          - gcc@12.2.0
+          - gcc@12
           - gcc@11.3.0
-          - gcc@10.4.0
-          - gcc@9.5.0
+          - gcc@10
+          - gcc@9
+          - gcc@4
         core_compilers:
           - ${spack_core_compiler}
         core_specs:
@@ -89,7 +90,7 @@ spack:
         f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
         fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
       flags: {}
-      operating_system: centos7
+      operating_system: ${os_version}
       target: x86_64
       modules: []
       environment: {}
@@ -107,26 +108,24 @@ spack:
 
   specs:
 
-    #- anaconda2
-    #- anaconda3
-    - apptainer~suid ^go@1.18
+    - apptainer~suid
     - autoconf-archive
     - autoconf@2.69
     - autoconf@2.71 # https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-2021-1-beta04-HPC-Toolkit-build-error-with-loopopt/m-p/1184181
     - automake@1.16.5
-    - bash@5.1
+    - bash@5
     - binutils+ld
-    - bison@3.8
+    - bison
     - bzip2
-    - cantera ^intel-oneapi-mkl # 95% of the time just 'cantera' went off without a hitch in my experimentation.  then it tried to use nvhpc for BLAS & failed.  don't let it, manually specify mkl.
+    - cantera ^intel-oneapi-mkl
     - cgns
-    - charliecloud+squash^libfuse~utils
-    - cmake@3.24
+    #- charliecloud+squash^libfuse~utils
+    - cmake
     - curl
     - diffutils
     - doxygen+graphviz
     - eigen
-    - emacs+X+tls toolkit=gtk ^gnutls@3.6.15^nettle@3.4.1 # why so specific?  latest gnutls+nettle fails inside nettle with an OpenSSL incompatibility
+    - emacs+X+tls toolkit=gtk
     - findutils
     - flex
     - gawk
@@ -134,30 +133,23 @@ spack:
     - gdbm
     - gettext
     - git
-    - gimp ^librsvg@2.40.21 ^gnutls@3.6.8 ^nettle@3.4.1 ^libproxy~python
-    - gmake@4.3
+    #- gimp ^librsvg@2.40.21 ^gnutls@3.6.8 ^nettle@3.4.1 ^libproxy~python
+    - gmake
     - gmsh+eigen+openmp
     - gnuplot+X
-    - go@1.18 # required for podman, might as well install it as a root spec and get a module for it...
     - hwloc
-    - imagemagick@7.0.8-7 ^librsvg@2.40.21 # the librsvg dependency had build issues, so cowardly fall back to the OS version (specified above as an 'external')
+    - imagemagick
     - intel-oneapi-mkl
     - intel-oneapi-tbb
-    - julia@1.7 ^llvm@12.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
-    - julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
-    - less
+    #- julia@1.7 ^llvm@12.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
+    #- julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     - libfuse
-    - librsvg@2.40.21
-    - librsvg@2.50.2
-    - librsvg@2.51.0
     - libszip
-    - libtool@2.4.7
+    - libtool
     - libxml2
     - lmod
-    - m4@1.4.19
     - mercurial
     - meson
-    #- miniconda2
     - miniconda3
     - mutationpp
     - ncurses
@@ -167,29 +159,28 @@ spack:
     - openssh
     - pandoc
     - parallel
-    - paraview+qt ^protobuf@3.21 # +python had issues, specify protobuf version to prevent erroneous 'Warning: There is no checksum on file to fetch protobuf@21.1 safely.' (21.1 is not a thing, so why is it looking for it...?)
+    #- paraview+qt ^protobuf@3.21 # +python had issues, specify protobuf version to prevent erroneous 'Warning: There is no checksum on file to fetch protobuf@21.1 safely.' (21.1 is not a thing, so why is it looking for it...?)
     - pdsh
     - perl%${spack_core_compiler} # perl also gets built with older gcc via julia above, so fully specify so this makes it into the 'root' of our environment.
     - pkgconf
-    - podman@4 ^go@1.18
-    - qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
-    - r@4.2+X+rmath
+    #- podman@4 ^go@1.18
+    #- qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
+    - r+X+rmath
     - readline
-    - rsync@3.2.4
+    - rsync
     - ruby
     - scons
     - screen
-    - singularityce~suid ^go@1.18
-    - slirp4netns
+    #- slirp4netns
     - slurm
     - sqlite
     - squashfs
     - squashfuse
-    - strace@5.17
+    - strace
     - subversion
-    - tar@1.34
+    - tar
     - tcl
-    - tcsh
+    #- tcsh
     #- tecplot
     - texlive
     - tk
@@ -230,8 +221,6 @@ spack compilers
 
 spack concretize --fresh \
     || exit 1
-
-#exit 1
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all

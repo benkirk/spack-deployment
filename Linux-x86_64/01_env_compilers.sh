@@ -10,7 +10,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 spack_env="${spack_deployment}-compilers"
 spack_yaml="spack-${spack_env}.yaml"
-#spack_lmod_root=${spack_clone_path}/share/spack/lmod/${spack_env}
+
 echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
 
 cat >${spack_yaml} <<EOF
@@ -87,13 +87,16 @@ spack:
       compiler:: [${spack_system_compiler}]
     gcc:
       variants: [+piclibs, 'languages=c,c++,fortran,go']
+    cuda:
+      variants: [+allow-unsupported-compilers]
 
   specs:
-    - lmod        %${spack_system_compiler}
-    - gcc@12.2.0  %${spack_system_compiler}
-    - gcc@11.3.0  %${spack_system_compiler}
-    - gcc@10.4.0  %${spack_system_compiler}
-    - gcc@9.5.0   %${spack_system_compiler}
+    - lmod ^lua@5.3  # why 5.3?  Because 5.4 fails to build on a minimal Rocky8 host
+    - gcc@12
+    - gcc@11.3.0
+    - gcc@10
+    - gcc@9
+    - gcc@4
 EOF
 
 spack env remove -y ${spack_env} 2>/dev/null
@@ -125,18 +128,19 @@ wait
 spack clean -s
 
 spack load ${spack_core_compiler} && spack compiler add && spack unload --all && spack compiler list \
-	|| exit 1
+ 	|| exit 1
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-    intel-oneapi-compilers@2022.2.1 %${spack_core_compiler} \
-    llvm@15.0.4+flang+cuda cuda_arch=80 %${spack_core_compiler} \
-    nvhpc@22.9 %${spack_core_compiler} \
-    cuda@11 %${spack_core_compiler} \
-    && spack concretize --fresh \
-	|| exit 1
+   intel-oneapi-compilers@2023.1.0 %${spack_core_compiler} \
+   llvm@16.0.2+flang %${spack_core_compiler} \
+   nvhpc@23.3 %${spack_core_compiler} \
+   cuda %${spack_core_compiler} \
+   && spack concretize --fresh \
+   || exit 1
 
-#     aocc+license-agreed %${spack_core_compiler} \
+#   llvm@16.0.2+flang+cuda cuda_arch=80 %${spack_core_compiler} \
+#   cuda %${spack_core_compiler} \
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all
@@ -149,11 +153,6 @@ done
 # but fall back to a --no-cache attempt if necessary
 spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
 wait
-
-# ### this one will prompt - insert the contents of your $INTEL_LICENSE_FILE
-# spack add intel-parallel-studio@professional.2020.4 %${spack_core_compiler} && spack concretize && spack install --deprecated --yes-to-all || exit 1
-
-# spack find --no-groups | egrep "gcc|llvm|intel" | sort | uniq
 
 # build/refresh the lmod module tree
 ### ** delete the whole tree only at the first (compiler) level. **

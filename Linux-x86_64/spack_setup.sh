@@ -50,21 +50,9 @@ config:
 
 EOF
 
-# install base spack repo: this step could be pinned to a fixed version of spack, if desired
-[ ! -d ${SPACK_BASE}/spack ] \
-    && mkdir -p ${SPACK_BASE} \
-    && cd ${SPACK_BASE} \
-    && git clone -c feature.manyFiles=true ${spack_git_repo} ./spack \
-    && cd ./spack && git fetch --tags && git checkout -b 0.19.0-BSK v0.19.0-BSK
-
-# We can use ${SPACK_BASE}/spack for everything, or create separare clones
-# for different parts of the stack.  If our base/deps paths are different,
-# then lets try out "spack clone"
-### create a clone from our master repo.
-### this clone is where our installs will take place.
-### do the clone in a subshell so the 'source setup-env.sh' does not persist here
-[ "x${SPACK_BASE}/spack" != "x${spack_clone_path_base}" ] && eval [ ! -d ${spack_clone_path_base} ] && cd ${SPACK_BASE}/spack && . share/spack/setup-env.sh && spack clone ${spack_clone_path_base} && cd ${spack_clone_path_base} && git fetch --tags && git checkout -b 0.19.0-BSK v0.19.0-BSK
-[ "x${SPACK_BASE}/spack" != "x${spack_clone_path_deps}" ] && eval [ ! -d ${spack_clone_path_deps} ] && cd ${SPACK_BASE}/spack && . share/spack/setup-env.sh && spack clone ${spack_clone_path_deps} && cd ${spack_clone_path_deps} && git fetch --tags && git checkout -b 0.19.0-BSK v0.19.0-BSK
+# install spack repo: this step could be pinned to a fixed version of spack, if desired
+[ ! -d ${spack_clone_path} ] \
+    && ${spack_clone_command} ${spack_clone_path}
 
 # spack supports Lmod, but having Lmod in our shell environment *before* invoking spack is a recipe for trouble.
 # below is an attempt to 'sanitize' our shell from the broader FSL Lmod
@@ -87,7 +75,7 @@ my_spack_refresh_lmod()
         && module use ${spack_lmod_root}/Core \
         && module avail
 
-cat >~/spack_modules_${spack_deployment}.sh <<EOF
+cat > ~/spack_modules_${spack_deployment}.sh <<EOF
 # To use this module stack do the following:
 
 # remove any existing module implementation fron the current shell, as much as possible
@@ -178,4 +166,5 @@ cd ${spack_clone_path} && pwd && . share/spack/setup-env.sh || exit 1
 [ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add mysrcmirror ${spack_source_cache}
 [ -d ${spack_build_cache}                 ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
 
+mkdir -p ${SPACK_BASE}/build && cd ${SPACK_BASE}/build && echo "pwd=$(pwd)" || exit 1
 echo "Finished initalization from ${SCRIPTDIR}/spack_setup.sh"
