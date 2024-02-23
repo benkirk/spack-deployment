@@ -7,10 +7,6 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
     { echo "cannot locate ${SCRIPTDIR}/spack_setup.sh}"; exit 1; }
 #----------------------------------------------------------------------------
 
-# navigate to our clone directory and set up the spack environment
-spack_clone_path=${spack_clone_path_deps} \
-    && cd ${spack_clone_path} && pwd && . share/spack/setup-env.sh || exit 1
-
 spack_env="${spack_deployment}-compiler-deps"
 spack_yaml="spack-${spack_env}.yaml"
 
@@ -30,19 +26,6 @@ spack:
 
   concretizer:
     unify: false
-
-  packages:
-    hdf5:
-      variants: [+fortran, +cxx, +szip, +hl]
-    hpe-mpt:
-      buildable: False
-      externals:
-      - spec: hpe-mpt@2.26
-        prefix: /software/x86_64/mpi/hpe-mpt-2.26
-      - spec: hpe-mpt@2.24
-        prefix: /software/x86_64/mpi/hpe-mpt-2.24
-    all:
-      compiler: [${spack_core_compiler}]
 
   modules:
     view_relative_modules:
@@ -74,7 +57,6 @@ spack:
               '{name}_ROOT': '{prefix}'
         projections:
           hdf5+mpi: '{name}-mpi/{version}'
-          #hdf5+mpi+fortran+cxx+hl+szip: '{name}-mpi/{version}'
 
   view:
     my_view:
@@ -83,16 +65,17 @@ spack:
         all: '{name}/{version}-{hash:7}-{compiler.name}-{compiler.version}'
         ^mpi: '{name}/{version}-{hash:7}-{^mpi.name}-{^mpi.version}-{compiler.name}-{compiler.version}'
       link: roots
-      link_type: hardlink
+      #link_type: hardlink
+      link_type: symlink
 
   compilers:
   - compiler:
-      spec: gcc@12.2.0
+      spec: gcc@12.3.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.2.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.2.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.2.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.2.0/bin/gfortran
+        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gcc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/g++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -140,12 +123,12 @@ spack:
 #       extra_rpaths: []
 
   - compiler:
-      spec: nvhpc@23.3
+      spec: nvhpc@22.9
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvc++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.3/Linux_x86_64/23.3/compilers/bin/nvfortran
+        cc: ${spack_view_path}/${spack_deployment}-compilers//nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvc++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/22.9/Linux_x86_64/22.9/compilers/bin/nvfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -233,7 +216,7 @@ spack:
 #    - clang@15.0.4
 
   - gcc_compilers:
-    - gcc@12.2.0
+    - gcc@12.3.0
     - gcc@11.3.0
 #    - gcc@10.4.0
 #    - gcc@9.5.0
@@ -242,7 +225,7 @@ spack:
     - oneapi@2023.1.0
 
   - nvidia_compilers:
-    - nvhpc@23.3
+    - nvhpc@22.9
 
   - all_compilers:
     - \$amd_compilers
@@ -294,10 +277,11 @@ EOF
 
 unset MPIS COMPS SPKGS PPKGS
 MPIS=('mpich@4.1.1+slurm' 'openmpi@4.1.5+legacylaunchers schedulers=slurm')
-#COMPS=('gcc@9.5.0' 'gcc@10.4.0' 'gcc@11.3.0' 'gcc@12.2.0' 'oneapi@2023.1.0' 'nvhpc@23.3')
-COMPS=('gcc@11.3.0' 'gcc@12.2.0' 'oneapi@2023.1.0' 'nvhpc@23.3')
+#COMPS=('gcc@9.5.0' 'gcc@10.4.0' 'gcc@11.3.0' 'gcc@12.3.0' 'oneapi@2023.1.0' 'nvhpc@22.9')
+COMPS=('gcc@11.3.0' 'gcc@12.3.0' 'oneapi@2023.1.0')
+#COMPS=('gcc@11.3.0' 'gcc@12.3.0' 'oneapi@2023.1.0')
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp')
-PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'hpcg' 'osu-micro-benchmarks@7.1-1')
+PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks@7.1-1')
 for comp in "${COMPS[@]}"; do
     for spkg in "${SPKGS[@]}"; do
         echo "    - $spkg %$comp" >> ${spack_yaml}
@@ -310,8 +294,8 @@ for comp in "${COMPS[@]}"; do
     done
 done
 
-COMPS=('gcc@11.3.0' 'gcc@12.2.0')
-PPKGS=('mpifileutils~gpfs+lustre+xattr')
+COMPS=('gcc@11.3.0' 'gcc@12.3.0')
+PPKGS=('mpifileutils~gpfs~lustre+xattr' 'hpcg')
 for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do
         echo "    - $mpi %$comp" >> ${spack_yaml}
@@ -321,11 +305,26 @@ for comp in "${COMPS[@]}"; do
     done
 done
 
+cat >>${spack_yaml} <<EOF
+  packages:
+    hdf5:
+      variants: [+fortran, +cxx, +szip, +hl]
+    hpe-mpt:
+      buildable: False
+      externals:
+      - spec: hpe-mpt@2.26
+        prefix: /software/x86_64/mpi/hpe-mpt-2.26
+      - spec: hpe-mpt@2.24
+        prefix: /software/x86_64/mpi/hpe-mpt-2.24
+    all:
+      compiler: [${spack_core_compiler}]
+EOF
+
 
 my_build_fixed_externals \
     ${spack_view_path}/${spack_deployment}-base \
     cmake autoconf libtool automake slurm openssh perl findutils diffutils m4 curl tar pkgconf util-macros libszip \
-    gettext hwloc numactl libxml2 zlib xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
+    gettext numactl libxml2 zlib xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
     && echo "Fixed Externals:" && cat fixed_externals.yaml | tee -a ${spack_yaml}
 
 # debug the yaml file
@@ -342,9 +341,6 @@ spack compilers
 
 spack concretize --fresh \
     || exit 1
-
-# debug the concretize step
-#exit 0
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all

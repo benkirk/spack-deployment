@@ -104,7 +104,8 @@ my_build_fixed_externals()
     local inst_path=$1 && shift
     [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_externals must be an installation path!!"; exit 1; }
 
-    echo "  packages:" > fixed_externals.yaml
+    #echo "  packages:" > fixed_externals.yaml
+    echo "# fixed external packages follow..." > fixed_externals.yaml
     for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
         if [ ! -d ${inst_path}/${pkg} ]; then
             >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"

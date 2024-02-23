@@ -97,11 +97,6 @@ spack:
       extra_rpaths: []
 
   packages:
-    # librsvg:
-    #   #buildable: False
-    #   externals:
-    #   - spec: librsvg@2.40.20
-    #     prefix: /usr
     all:
       compiler: [${spack_core_compiler}]
       variants: [~mpi, +fortran] # make sure mpi doesn't sneak in through hdf5 (to paraview), or any sub-package.  enable fortran where applicable.
@@ -135,19 +130,18 @@ spack:
     - git
     - gimp
     - gmake
-    #- gmsh+eigen+openmp cxxflags="-fpermissive"
+    - gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
-    - hwloc
     - imagemagick
     - intel-oneapi-mkl
     - intel-oneapi-tbb
     #- julia@1.7 ^llvm@12.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     #- julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
-    #- libfuse
     - libszip
     - libtool
     - libxml2
     - lmod
+    - m4
     - mercurial
     - meson
     - miniconda3
@@ -159,12 +153,12 @@ spack:
     - openssh
     - pandoc
     - parallel
-    #- paraview+qt ^protobuf@3.21 # +python had issues, specify protobuf version to prevent erroneous 'Warning: There is no checksum on file to fetch protobuf@21.1 safely.' (21.1 is not a thing, so why is it looking for it...?)
+    - paraview+qt
     - pdsh
     - perl%${spack_core_compiler} # perl also gets built with older gcc via julia above, so fully specify so this makes it into the 'root' of our environment.
     - pkgconf
     - podman@4
-    #- qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
+    - qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
     - r+X+rmath
     - readline
     - rsync
@@ -175,11 +169,11 @@ spack:
     - sqlite
     - squashfs
     - squashfuse
-    #- strace
+    - strace
     - subversion
     - tar
     - tcl
-    #- tcsh
+    - tcsh
     #- tecplot
     - texlive
     - tk
