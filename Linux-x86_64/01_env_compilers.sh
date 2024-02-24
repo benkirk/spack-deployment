@@ -64,19 +64,19 @@ spack:
         aocc:
            environment:
              set:
-               CXXFLAGS: '-std=gnu++17 --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               CFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               FCFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               FFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               LDFLAGS: '-Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/lib -Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64'
+               CXXFLAGS: '-std=gnu++17 --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               CFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               FCFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               FFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               LDFLAGS: '-Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/lib -Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
         intel-oneapi-compilers:
            environment:
              set:
-               CXXFLAGS: '-std=gnu++17 --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               CFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               FCFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               FFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0'
-               LDFLAGS: '-L${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64 -Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/lib64'
+               CXXFLAGS: '-std=gnu++17 --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               CFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               FCFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               FFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
+               LDFLAGS: '-L${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64 -Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
 
         projections:
           all: '{name}/{version}'
@@ -91,12 +91,12 @@ spack:
       variants: [+allow-unsupported-compilers]
 
   specs:
-    - lmod ^lua@5.3  # why 5.3?  Because 5.4 fails to build on a minimal Rocky8 host
-    - gcc@12
-    - gcc@11.3.0
+    - lmod
+    - gcc@12.3.0
+    - gcc@11
     #- gcc@10
     #- gcc@9
-    - gcc@4
+    #- gcc@4
 EOF
 
 spack env remove -y ${spack_env} 2>/dev/null
@@ -132,16 +132,18 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-      intel-oneapi-compilers@2023.1.0 %${spack_core_compiler} \
-      nvhpc@22.9 %${spack_core_compiler} \
-      cuda@11.8 %${spack_core_compiler} \
+      intel-oneapi-compilers@2023.2.1 %${spack_core_compiler} \
+      nvhpc@23 %${spack_core_compiler} \
+      cuda@11 %${spack_core_compiler} \
     && spack concretize --fresh \
     || exit 1
 
 
+#      nvhpc@22.9 %${spack_core_compiler} \
+
 #      llvm@16.0.2+flang %${spack_core_compiler} \
 
-#    nvhpc@23.3 %${spack_core_compiler} \
+
 
 #   llvm@16.0.2+flang+cuda cuda_arch=80 %${spack_core_compiler} \
 #   cuda %${spack_core_compiler} \

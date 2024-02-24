@@ -47,7 +47,7 @@ spack:
           - lmod
         include:
           - gcc@12
-          - gcc@11.3.0
+          - gcc@11
           - gcc@10
           - gcc@9
           - gcc@4
@@ -83,12 +83,12 @@ spack:
 
   compilers:
   - compiler:
-      spec: gcc@11.3.0
+      spec: gcc@12.3.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.3.0/bin/gfortran
+        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gcc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/g++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -114,7 +114,7 @@ spack:
     - bzip2
     - cantera ^intel-oneapi-mkl
     - cgns
-    #- charliecloud+squash^libfuse~utils
+    - charliecloud+squashfuse
     - cmake
     - curl
     - diffutils
@@ -128,14 +128,13 @@ spack:
     - gdbm
     - gettext
     - git
-    - gimp
+    - gimp ^highway@1.0.4 # 1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
     - gmake
     #- gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
     - imagemagick
     - intel-oneapi-mkl
     - intel-oneapi-tbb
-    #- julia@1.7 ^llvm@12.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     #- julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
     - libszip
     - libtool
