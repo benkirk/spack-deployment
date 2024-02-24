@@ -130,7 +130,7 @@ spack:
     - git
     - gimp
     - gmake
-    - gmsh+eigen+openmp cxxflags="-fpermissive"
+    #- gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
     - imagemagick
     - intel-oneapi-mkl

@@ -132,15 +132,17 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-   intel-oneapi-compilers@2023.1.0 %${spack_core_compiler} \
-   nvhpc@22.9 %${spack_core_compiler} \
-   cuda@11.8 %${spack_core_compiler} \
-   && spack concretize --fresh \
-   || exit 1
+      intel-oneapi-compilers@2023.1.0 %${spack_core_compiler} \
+      nvhpc@22.9 %${spack_core_compiler} \
+      cuda@11.8 %${spack_core_compiler} \
+    && spack concretize --fresh \
+    || exit 1
+
+
+#      llvm@16.0.2+flang %${spack_core_compiler} \
 
 #    nvhpc@23.3 %${spack_core_compiler} \
 
-#   llvm@16.0.2+flang %${spack_core_compiler} \
 #   llvm@16.0.2+flang+cuda cuda_arch=80 %${spack_core_compiler} \
 #   cuda %${spack_core_compiler} \
 
