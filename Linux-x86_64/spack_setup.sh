@@ -45,8 +45,8 @@ cat > ~/.spack/config.yaml <<EOF
 config:
   db_lock_timeout: 10
   url_fetch_method: curl
-  # install_tree:
-  #   padded_length: 128
+  #install_tree:
+  #  padded_length: 128
 
 EOF
 

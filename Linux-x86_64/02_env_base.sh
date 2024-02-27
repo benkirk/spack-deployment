@@ -56,7 +56,7 @@ spack:
         core_specs:
           - gcc
           - intel-oneapi-compilers
-          - intel-parallel-studio
+          - intel-oneapi-compilers-classic
           - julia
           - llvm
         all:
@@ -75,11 +75,13 @@ spack:
 
         projections:
           all: '{name}/{version}'
-          intel-oneapi-compilers: 'oneapi/{version}'
+          intel-oneapi-compilers: 'intel-oneapi/{version}'
+          intel-oneapi-compilers-classic: 'intel-classic/{version}'
           intel-oneapi-mkl: 'intel-mkl/{version}'
           intel-oneapi-tbb: 'intel-tbb/{version}'
+          intel-oneapi-vtune: 'intel-vtune/{version}'
           r: 'R/{version}'
-          mutationpp: 'mutation++/{version}'
+          mutationpp: 'mutation/{version}'
 
   compilers:
   - compiler:
@@ -112,9 +114,9 @@ spack:
     - binutils+ld
     - bison
     - bzip2
-    - cantera ^intel-oneapi-mkl
+    #- cantera ^intel-oneapi-mkl
     - cgns
-    - charliecloud+squashfuse
+    - charliecloud #+squashfuse
     - cmake
     - curl
     - diffutils
@@ -135,8 +137,11 @@ spack:
     - imagemagick
     - intel-oneapi-mkl
     - intel-oneapi-tbb
+    - intel-oneapi-vtune
     #- julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
+    - libevent
     - libszip
+    - libtirpc
     - libtool
     - libxml2
     - lmod
@@ -150,6 +155,7 @@ spack:
     - numactl
     - openjdk
     - openssh
+    - openssl
     - pandoc
     - parallel
     - paraview+qt
@@ -158,7 +164,7 @@ spack:
     - pkgconf
     - podman@4
     - qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
-    - r+X+rmath
+    - r+X
     - readline
     - rsync
     - ruby
@@ -174,6 +180,7 @@ spack:
     - tcl
     - tcsh
     #- tecplot
+    - texinfo
     - texlive
     - tk
     - tmux
@@ -184,6 +191,7 @@ spack:
     - wget
     - xz
     - zlib
+    - zlib-ng
     - zsh
 EOF
 

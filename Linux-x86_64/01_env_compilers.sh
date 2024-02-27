@@ -53,7 +53,7 @@ spack:
           - aocc
           - gcc
           - intel-oneapi-compilers
-          - intel-parallel-studio
+          - intel-oneapi-compilers-classic
           - llvm
           - nvhpc
           - cuda
@@ -61,26 +61,29 @@ spack:
           environment:
             set:
               '{name}_ROOT': '{prefix}'
-        aocc:
-           environment:
-             set:
-               CXXFLAGS: '-std=gnu++17 --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               CFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               FCFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               FFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               LDFLAGS: '-Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/aocc/3.2.0/lib -Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
+
         intel-oneapi-compilers:
            environment:
-             set:
-               CXXFLAGS: '-std=gnu++17 --gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               CFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               FCFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               FFLAGS: '--gcc-toolchain=${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0'
-               LDFLAGS: '-L${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64 -Wl,-rpath,${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
+             prepend_path:
+               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin'
+               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
+
+        intel-oneapi-compilers-classic:
+           environment:
+             prepend_path:
+               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin'
+               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
+
+        nvhpc:
+           environment:
+             prepend_path:
+               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin'
+               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
 
         projections:
           all: '{name}/{version}'
-          intel-oneapi-compilers: 'oneapi/{version}'
+          intel-oneapi-compilers: 'intel-oneapi/{version}'
+          intel-oneapi-compilers-classic: 'intel-classic/{version}'
 
   packages:
     all:
@@ -94,9 +97,8 @@ spack:
     - lmod
     - gcc@12.3.0
     - gcc@11
-    #- gcc@10
-    #- gcc@9
-    #- gcc@4
+    - gcc@10
+    - gcc@4
 EOF
 
 spack env remove -y ${spack_env} 2>/dev/null
@@ -133,18 +135,17 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
       intel-oneapi-compilers@2023.2.1 %${spack_core_compiler} \
+      intel-oneapi-compilers-classic@2021.10.0 %${spack_core_compiler} \
       nvhpc@23 %${spack_core_compiler} \
       cuda@11 %${spack_core_compiler} \
     && spack concretize --fresh \
     || exit 1
 
-
-#      nvhpc@22.9 %${spack_core_compiler} \
-
-#      llvm@16.0.2+flang %${spack_core_compiler} \
+#       llvm@17+flang %${spack_core_compiler} \
 
 
-
+#   nvhpc@22.9 %${spack_core_compiler} \
+#   llvm@16.0.2+flang %${spack_core_compiler} \
 #   llvm@16.0.2+flang+cuda cuda_arch=80 %${spack_core_compiler} \
 #   cuda %${spack_core_compiler} \
 
