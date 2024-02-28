@@ -243,6 +243,7 @@ spack:
 EOF
 
 unset MPIS COMPS SPKGS PPKGS
+MPIS=('mpich@4+slurm' 'openmpi@4+legacylaunchers schedulers=slurm')
 #COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'nvhpc@23.9')
 COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'intel@2021.10.0')
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi')
@@ -271,13 +272,20 @@ for comp in "${COMPS[@]}"; do
     done
 done
 
-MPIS=('openmpi@4+legacylaunchers schedulers=slurm')
+#MPIS=('openmpi@4+legacylaunchers schedulers=slurm')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'intel@2021.10.0')
 PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
+for comp in "${COMPS[@]}"; do
+    for mpi in "${MPIS[@]}"; do
+        echo "    - $mpi %$comp" >> ${spack_yaml}
+        for ppkg in "${PPKGS[@]}"; do
+            echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}
+        done
+    done
+done
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'intel@2021.10.0')
 PPKGS+=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
 for comp in "${COMPS[@]}"; do
-    for spkg in "${SPKGS[@]}"; do
-        echo "    - $spkg %$comp" >> ${spack_yaml}
-    done
     for mpi in "${MPIS[@]}"; do
         echo "    - $mpi %$comp" >> ${spack_yaml}
         for ppkg in "${PPKGS[@]}"; do
