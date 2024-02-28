@@ -243,13 +243,11 @@ spack:
 EOF
 
 unset MPIS COMPS SPKGS PPKGS
-MPIS=('mpich@4+slurm' 'openmpi@4+legacylaunchers schedulers=slurm')
 #COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'nvhpc@23.9')
 COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'intel@2021.10.0')
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi')
 SPKGS+=('boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11')
 PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks' 'mpl')
-PPKGS+=('petsc@3.17+fortran+hdf5+hypre~metis+mpi+openmp+scalapack+shared+suite-sparse~superlu-dist ^intel-oneapi-mkl')
 for comp in "${COMPS[@]}"; do
     for spkg in "${SPKGS[@]}"; do
         echo "    - $spkg %$comp" >> ${spack_yaml}
@@ -272,6 +270,22 @@ for comp in "${COMPS[@]}"; do
         done
     done
 done
+
+MPIS=('openmpi@4+legacylaunchers schedulers=slurm')
+PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
+PPKGS+=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
+for comp in "${COMPS[@]}"; do
+    for spkg in "${SPKGS[@]}"; do
+        echo "    - $spkg %$comp" >> ${spack_yaml}
+    done
+    for mpi in "${MPIS[@]}"; do
+        echo "    - $mpi %$comp" >> ${spack_yaml}
+        for ppkg in "${PPKGS[@]}"; do
+            echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}
+        done
+    done
+done
+
 
 cat >>${spack_yaml} <<EOF
   packages:
