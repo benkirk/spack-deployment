@@ -19,7 +19,6 @@ spack:
     build_stage: ${spack_build_stage_path}
     install_tree:
       root: ${spack_clone_path}/${spack_env}
-      #padded_length: 112
       projections:
           all: '{name}/{version}-{hash:7}-{compiler.name}-{compiler.version}'
           ^mpi: '{name}/{version}-{hash:7}-{^mpi.name}-{^mpi.version}-{compiler.name}-{compiler.version}'
@@ -50,7 +49,8 @@ spack:
           - '%${spack_system_compiler}'
           - lmod
         core_compilers:
-          - ${spack_core_compiler}
+          #- ${spack_core_compiler}
+          - None
         all:
           environment:
             set:
