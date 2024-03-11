@@ -116,6 +116,7 @@ spack:
     - autoconf@2.71 # https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-2021-1-beta04-HPC-Toolkit-build-error-with-loopopt/m-p/1184181
     - automake@1.16.5
     - bash@5
+    - bc
     - binutils+ld
     - bison
     - bzip2
