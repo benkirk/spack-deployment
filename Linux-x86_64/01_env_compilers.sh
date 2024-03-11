@@ -165,3 +165,48 @@ wait
 ### ** delete the whole tree only at the first (compiler) level. **
 ### ** subsequent steps are additive **
 my_spack_refresh_lmod --delete-tree -y
+
+# create some manual modules for the system compiler:
+sys_gcc_vers=$(echo "${spack_system_compiler}" | cut -d '@' -f2-)
+
+mkdir -p "${spack_lmod_root}/gcc/${sys_gcc_vers}"{,-m32}
+
+cat <<EOF > "${spack_lmod_root}/Core/gcc/${sys_gcc_vers}.lua"
+whatis("Name : gcc")
+whatis("Version : ${sys_gcc_vers}")
+whatis("Target : x86_64")
+whatis("Short description : The GNU Compiler Collection includes front ends for C, C++, Objective-C, Fortran, Ada, and Go, as well as libraries for these languages.")
+whatis("(base OS version)")
+help([[Name   : gcc]])
+help([[Version: ${sys_gcc_vers}]])
+help([[Target : x86_64]])
+help()
+help([[The GNU Compiler Collection includes front ends for C, C++, Objective-C, Fortran, Ada, and Go, as well as libraries for these languages.]])
+family("compiler")
+prepend_path("MODULEPATH","${spack_lmod_root}/gcc/${sys_gcc_vers}")
+setenv("CC",/usr/bin/gcc")
+setenv("CXX","/usr/bin/g++")
+setenv("FC","/usr/bin/gfortran")
+setenv("F77","/usr/bin/gfortran")
+setenv("GCC_ROOT","/usr")
+EOF
+
+cat <<EOF > "${spack_lmod_root}/Core/gcc/${sys_gcc_vers}-m32.lua"
+whatis("Name : gcc")
+whatis("Version : ${sys_gcc_vers} (32-bit executables)")
+whatis("Target : x86_64")
+whatis("Short description : The GNU Compiler Collection includes front ends for C, C++, Objective-C, Fortran, Ada, and Go, as well as libraries for these languages.")
+whatis("(base OS version)")
+help([[Name   : gcc]])
+help([[Version: ${sys_gcc_vers}]])
+help([[Target : x86_64]])
+help()
+help([[The GNU Compiler Collection includes front ends for C, C++, Objective-C, Fortran, Ada, and Go, as well as libraries for these languages.]])
+family("compiler")
+prepend_path("MODULEPATH","${spack_lmod_root}/gcc/${sys_gcc_vers}-m32")
+setenv("CC",/usr/bin/gcc -m32")
+setenv("CXX","/usr/bin/g++ -m32")
+setenv("FC","/usr/bin/gfortran -m32")
+setenv("F77","/usr/bin/gfortran -m32")
+setenv("GCC_ROOT","/usr")
+EOF
