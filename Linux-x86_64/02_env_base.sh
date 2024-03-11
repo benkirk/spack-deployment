@@ -63,6 +63,11 @@ spack:
           environment:
             set:
               '{name}_ROOT': '{prefix}'
+        julia:
+          environment:
+            set:
+              'JULIA_PKG_USE_CLI_GIT': '1'
+
         # the tecplot module definition needs some help to find bin, and to set a sensible license file
         tecplot:
           environment:
