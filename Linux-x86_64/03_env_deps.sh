@@ -52,6 +52,7 @@ spack:
           #- ${spack_core_compiler}
           - None
         all:
+          autoload: direct
           environment:
             set:
               '{name}_ROOT': '{prefix}'

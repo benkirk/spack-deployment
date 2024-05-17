@@ -60,6 +60,7 @@ spack:
           - julia
           - llvm
         all:
+          autoload: direct
           environment:
             set:
               '{name}_ROOT': '{prefix}'
