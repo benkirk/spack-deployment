@@ -66,20 +66,20 @@ spack:
         intel-oneapi-compilers:
            environment:
              prepend_path:
-               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin'
-               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/lib64'
+               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin'
+               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
 
         intel-oneapi-compilers-classic:
            environment:
              prepend_path:
-               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin'
-               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/lib64'
+               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin'
+               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
 
         nvhpc:
            environment:
              prepend_path:
-               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin'
-               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/lib64'
+               PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin'
+               LD_LIBRARY_PATH: '${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64'
 
         projections:
           all: '{name}/{version}'
@@ -96,8 +96,8 @@ spack:
 
   specs:
     - lmod
-    - gcc@13.2.0
-    - gcc@12
+    - gcc@13
+    - gcc@12.3.0
     - gcc@11
     - gcc@10
     - gcc@4
@@ -136,7 +136,7 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-      intel-oneapi-compilers@2024.1.0 %${spack_core_compiler} \
+      intel-oneapi-compilers@2023.2.4 %${spack_core_compiler} \
       intel-oneapi-compilers-classic@2021.10.0 %${spack_core_compiler} \
       nvhpc@24 %${spack_core_compiler} \
       cuda@12 %${spack_core_compiler} \

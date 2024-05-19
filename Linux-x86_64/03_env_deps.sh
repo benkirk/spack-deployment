@@ -70,6 +70,20 @@ spack:
 
   compilers:
   - compiler:
+      spec: gcc@13.2.0
+      paths:
+        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gcc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/g++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gfortran
+      flags: {}
+      operating_system: ${os_version}
+      target: x86_64
+      modules: []
+      environment: {}
+      extra_rpaths: []
+
+  - compiler:
       spec: gcc@12.3.0
       paths:
         cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gcc
@@ -112,12 +126,12 @@ spack:
       extra_rpaths: []
 
   - compiler:
-      spec: nvhpc@23.9
+      spec: nvhpc@24.3
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.9/Linux_x86_64/23.9/compilers/bin/nvc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.9/Linux_x86_64/23.9/compilers/bin/nvc++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.9/Linux_x86_64/23.9/compilers/bin/nvfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/23.9/Linux_x86_64/23.9/compilers/bin/nvfortran
+        cc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvc++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -129,12 +143,12 @@ spack:
         - ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64
 
   - compiler:
-      spec: oneapi@2023.2.1
+      spec: oneapi@2023.2.4
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.1/compiler/latest/linux/bin/icx
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.1/compiler/latest/linux/bin/icpx
-        f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.1/compiler/latest/linux/bin/ifx
-        fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.1/compiler/latest/linux/bin/ifx
+        cc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/icx
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/icpx
+        f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
+        fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -192,10 +206,10 @@ spack:
     - gcc@11.4.0
 
   - oneapi_compilers:
-    - oneapi@2023.2.1
+    - oneapi@2023.2.4
 
   - nvidia_compilers:
-    - nvhpc@23.9
+    - nvhpc@24.3
 
   - all_compilers:
     - \$amd_compilers
@@ -209,7 +223,7 @@ spack:
     - \$nvidia_compilers
 
   - mpis: [ 'mpich@4+slurm',
-            'openmpi@4+legacylaunchers schedulers=slurm' ]
+            'openmpi@5+legacylaunchers schedulers=slurm' ]
 
   - serial_packages: [ 'hdf5~mpi+fortran+cxx+szip+hl',
                        'openblas threads=openmp' ]
@@ -244,9 +258,9 @@ spack:
 EOF
 
 unset MPIS COMPS SPKGS PPKGS
-MPIS=('mpich@4+slurm' 'openmpi@4+legacylaunchers schedulers=slurm')
-#COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'nvhpc@23.9')
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'intel@2021.10.0')
+MPIS=('mpich@4+slurm' 'openmpi@5+legacylaunchers schedulers=slurm')
+#COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'nvhpc@24.3')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'intel@2021.10.0')
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi')
 SPKGS+=('boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11')
 PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks' 'mpl')
@@ -262,7 +276,7 @@ for comp in "${COMPS[@]}"; do
     done
 done
 
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0')
 PPKGS=('mpifileutils~gpfs~lustre+xattr' 'hpcg') # 'dakota+mpi')
 for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do
@@ -273,8 +287,8 @@ for comp in "${COMPS[@]}"; do
     done
 done
 
-#MPIS=('openmpi@4+legacylaunchers schedulers=slurm')
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'oneapi@2023.2.1' 'intel@2021.10.0')
+#MPIS=('openmpi@5+legacylaunchers schedulers=slurm')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'intel@2021.10.0')
 PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
 for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do
@@ -284,7 +298,7 @@ for comp in "${COMPS[@]}"; do
         done
     done
 done
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'intel@2021.10.0')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'intel@2021.10.0')
 PPKGS+=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
 for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do

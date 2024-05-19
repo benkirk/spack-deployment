@@ -91,12 +91,12 @@ spack:
 
   compilers:
   - compiler:
-      spec: gcc@13.2.0
+      spec: gcc@12.3.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gfortran
+        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gcc
+        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/g++
+        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
+        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -135,7 +135,7 @@ spack:
     - gawk
     - gdb
     - gdbm
-    #- gettext
+    - gettext
     - git
     #- gimp ^highway@1.0.4 # 1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
     - gmake
