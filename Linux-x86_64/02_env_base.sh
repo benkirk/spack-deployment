@@ -137,7 +137,7 @@ spack:
     - gdbm
     - gettext
     - git
-    #- gimp ^highway@1.0.4 # 1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
+    - gimp ^highway@1.0.4 ^gettext+libxml2 # highway@1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
     - gmake
     #- gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
