@@ -149,7 +149,9 @@ spack:
         cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/icpx
         f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
         fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
-      flags: {}
+      flags:
+        cflags: -lpthread
+        cxxflags: -lpthread
       operating_system: ${os_version}
       target: x86_64
       modules: []
@@ -166,7 +168,9 @@ spack:
         cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers-classic/2021.10.0/bin/icpc
         f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers-classic/2021.10.0/bin/ifort
         fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers-classic/2021.10.0/bin/ifort
-      flags: {}
+      flags:
+        cflags: -lpthread
+        cxxflags: -lpthread
       operating_system: ${os_version}
       target: x86_64
       modules: []
@@ -259,8 +263,7 @@ EOF
 
 unset MPIS COMPS SPKGS PPKGS
 MPIS=('mpich@4+slurm' 'openmpi@5+legacylaunchers schedulers=slurm')
-#COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'nvhpc@24.3')
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'intel@2021.10.0')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'intel@2021.10.0') # 'nvhpc@24.3')
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi')
 SPKGS+=('boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11')
 PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks' 'mpl')
@@ -287,8 +290,7 @@ for comp in "${COMPS[@]}"; do
     done
 done
 
-#MPIS=('openmpi@5+legacylaunchers schedulers=slurm')
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'intel@2021.10.0')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0') # 'oneapi@2023.2.4' 'intel@2021.10.0')
 PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
 for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do
@@ -298,7 +300,7 @@ for comp in "${COMPS[@]}"; do
         done
     done
 done
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'intel@2021.10.0')
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0') # 'intel@2021.10.0')
 PPKGS+=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
 for comp in "${COMPS[@]}"; do
     for mpi in "${MPIS[@]}"; do
