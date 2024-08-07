@@ -126,6 +126,20 @@ spack:
       extra_rpaths: []
 
   - compiler:
+      spec: ${spack_system_compiler}
+      paths:
+        cc: /usr/bin/gcc
+        cxx: /usr/bin/g++
+        f77: /usr/bin/gfortran
+        fc: /usr/bin/gfortran
+      flags: {}
+      operating_system: ${os_version}
+      target: x86_64
+      modules: []
+      environment: {}
+      extra_rpaths: []
+
+  - compiler:
       spec: nvhpc@24.3
       paths:
         cc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvc
@@ -197,146 +211,111 @@ spack:
 #      extra_rpaths:
 #        - ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64
 
-  definitions:
-
-#  - amd_compilers:
-#    - aocc@3.2.0
-#
-#  - clang_compilers:
-#    - clang@15.0.4
-
-  - gcc_compilers:
-    - gcc@12.3.0
-    - gcc@11.4.0
-
-  - oneapi_compilers:
-    - oneapi@2023.2.4
-
-  - nvidia_compilers:
-    - nvhpc@24.3
-
-  - all_compilers:
-    - \$amd_compilers
-    - \$gcc_compilers
-    - \$oneapi_compilers
-    - \$nvidia_compilers
-
-  - preferred_compilers:
-    - \$gcc_compilers
-    - \$oneapi_compilers
-    - \$nvidia_compilers
-
-  - mpis: [ 'mpich@4+slurm',
-            'openmpi@5+legacylaunchers schedulers=slurm' ]
-
-  - serial_packages: [ 'hdf5~mpi+fortran+cxx+szip+hl',
-                       'openblas threads=openmp' ]
-
-  - parallel_packages: [ 'hdf5+mpi~fortran+cxx+szip+hl',
-                         'hpl ^intel-oneapi-mkl',
-                         'osu-micro-benchmarks' ]
-
-  specs:
-    - lmod%${spack_core_compiler}
-#    - matrix:
-#      - [ \$mpis, \$serial_packages ]
-#      - [ \$%all_compilers ]
-
-#    - matrix:
-#      - [ \$parallel_packages ]
-#      - [ \$^mpis  ]
-#      - [ \$%all_compilers ]
-#
-#    - matrix:
-#      - [ 'mpifileutils~gpfs~lustre+xattr', 'hpcg' ]
-#      - [ \$^mpis  ]
-#      - [ \$%gcc_compilers ]
-
-#    - matrix:
-#      - [ 'petsc+fortran+hdf5+hypre~metis~mkl-pardiso+mpi+openmp+scalapack+shared+suite-sparse+superlu-dist+tetgen ^intel-oneapi-mkl ^openmpi' ]
-#      - [ \$%gcc_compilers ]
-#
-#    - matrix:
-#      - [ 'petsc+fortran+hdf5+hypre~metis~mkl-pardiso+mpi+openmp+scalapack+shared+suite-sparse~superlu-dist+tetgen ^intel-oneapi-mkl ^openmpi' ]
-#      - [ \$%oneapi_compilers  ]
-EOF
-
-unset MPIS COMPS SPKGS PPKGS
-MPIS=('mpich@4+slurm' 'openmpi@5+legacylaunchers schedulers=slurm')
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4' 'intel@2021.10.0') # 'nvhpc@24.3')
-SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi')
-SPKGS+=('boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11')
-PPKGS=('hdf5+mpi~fortran+cxx+szip+hl' 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks' 'mpl')
-for comp in "${COMPS[@]}"; do
-    for spkg in "${SPKGS[@]}"; do
-        echo "    - $spkg %$comp" >> ${spack_yaml}
-    done
-    for mpi in "${MPIS[@]}"; do
-        echo "    - $mpi %$comp" >> ${spack_yaml}
-        for ppkg in "${PPKGS[@]}"; do
-            echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}
-        done
-    done
-done
-
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0')
-PPKGS=('mpifileutils~gpfs~lustre+xattr' 'hpcg') # 'dakota+mpi')
-for comp in "${COMPS[@]}"; do
-    for mpi in "${MPIS[@]}"; do
-        echo "    - $mpi %$comp" >> ${spack_yaml}
-        for ppkg in "${PPKGS[@]}"; do
-            echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}
-        done
-    done
-done
-
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0') # 'oneapi@2023.2.4' 'intel@2021.10.0')
-PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
-for comp in "${COMPS[@]}"; do
-    for mpi in "${MPIS[@]}"; do
-        echo "    - $mpi %$comp" >> ${spack_yaml}
-        for ppkg in "${PPKGS[@]}"; do
-            echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}
-        done
-    done
-done
-COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0') # 'intel@2021.10.0')
-PPKGS+=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
-for comp in "${COMPS[@]}"; do
-    for mpi in "${MPIS[@]}"; do
-        echo "    - $mpi %$comp" >> ${spack_yaml}
-        for ppkg in "${PPKGS[@]}"; do
-            echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}
-        done
-    done
-done
-
-
-cat >>${spack_yaml} <<EOF
   packages:
     hdf5:
       variants: [+fortran, +cxx, +szip, +hl]
-    hpe-mpt:
-      buildable: False
-      externals:
-      - spec: hpe-mpt@2.26
-        prefix: /software/x86_64/mpi/hpe-mpt-2.26
-      - spec: hpe-mpt@2.24
-        prefix: /software/x86_64/mpi/hpe-mpt-2.24
+    openmpi:
+      require: [+legacylaunchers, schedulers=slurm]
+    mpich:
+      require: [+slurm]
     all:
       compiler: [${spack_core_compiler}]
 EOF
 
-
 my_build_fixed_externals \
     ${spack_view_path}/${spack_deployment}-base \
     cmake autoconf libtool automake slurm openssh perl findutils diffutils m4 curl tar pkgconf util-macros libszip \
-    gmake gettext numactl libxml2 zlib zlib-ng xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
+    gmake gettext numactl libxml2 zlib zlib-ng zstd xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
     openssl libevent texinfo autoconf-archive \
     && echo "Fixed Externals:" && cat fixed_externals.yaml | tee -a ${spack_yaml}
+cat >>${spack_yaml} <<EOF
+  specs:
+    - lmod%${spack_core_compiler}
+EOF
+
+# function to loop over outer prodcut of (compiler)x(serial packages) & (compiler)x(mpis)x(parallel packages)
+comp_spkg_ppkg_loop() {
+
+    for comp in "${COMPS[@]}"; do
+        for spkg in "${SPKGS[@]}"; do
+            echo "    - $spkg %$comp" >> ${spack_yaml}.tmp
+        done
+        for mpi in "${MPIS[@]}"; do
+            echo "    - $mpi %$comp" >> ${spack_yaml}.tmp
+            for ppkg in "${PPKGS[@]}"; do
+                echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}.tmp
+            done
+        done
+    done
+}
+
+rm -f ${spack_yaml}.tmp
+
+# Define some complex package specs we'll use in multiple places
+cat <<EOF > hpc-apps-versions.cfg
+#---------------------------------------
+# compiler and mpi versions to use when
+# building hpc-apps
+# (automatically generated by ${0})
+
+MPICHS=( 'mpich@4+slurm' )
+OPENMPIS=( 'openmpi@5+legacylaunchers schedulers=slurm' )
+GCCS=( 'gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' )
+ONEAPIS=( 'oneapi@2023.2.4' )
+INTELS=( 'intel@2021.10.0' )
+NVHPCS=( 'nvhpc@24.3' )
+MPTS=( 'mpt@2.26' )
+
+unset MPIS COMPS SPKGS PPKGS
+MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}")
+COMPS=("\${GCCS[@]}" "\${ONEAPIS[@]}" "\${INTELS[@]}") #"\${NVHPCS[@]}")
+EOF
+
+. hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.cfg!!"; exit 1; }
+
+
+BOOST183='boost@1.83+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
+BOOST='boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
+HDF5='hdf5+mpi~fortran+cxx+szip+hl'
+
+SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi ^hdf5~mpi')
+SPKGS+=("${BOOST}")
+SPKGS+=("${BOOST183}")
+SPKGS+=('netcdf~mpi ^hdf5~mpi')
+
+PPKGS=( "${HDF5}" 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks' 'mpl' )
+comp_spkg_ppkg_loop
+
+unset SPKGS
+COMPS=("${GCCS[@]}")
+PPKGS=('mpifileutils~gpfs~lustre+xattr' 'hpcg')
+comp_spkg_ppkg_loop
+
+### BSK: # Dakota & gcc@13 dont mix
+### BSK: COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0')
+### BSK: PPKGS=("dakota@6.18+mpi ^${BOOST183}")
+### BSK: unset SPKGS
+### BSK: comp_spkg_ppkg_loop
+### BSK:
+### BSK: COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4')
+### BSK: PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
+### BSK: comp_spkg_ppkg_loop
+### BSK:
+### BSK: COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0')
+### BSK: PPKGS=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
+### BSK: comp_spkg_ppkg_loop
+### BSK:
+### BSK: COMPS=("${spack_system_compiler}")
+### BSK: unset MPIS
+### BSK: SPKGS=('netcdf~mpi ^hdf5~mpi')
+### BSK: unset PPKGS
+### BSK: comp_spkg_ppkg_loop
+
+# Weed out all the duplicates
+cat ${spack_yaml}.tmp | sort | uniq >> ${spack_yaml} && rm -f ${spack_yaml}.tmp
 
 # debug the yaml file
-#cat ${spack_yaml} && exit 0
+cat ${spack_yaml} #&& exit 0
 
 spack env remove -y ${spack_env} 2>/dev/null
 spack mark --all --implicit
@@ -367,12 +346,3 @@ wait
 
 # build/refresh the lmod module tree
 my_spack_refresh_lmod -y
-
-
-# $ spack -e FSL-compiler-deps find -Lv cmake
-#   ==> 4 installed packages
-#   -- linux-centos7-x86_64 / gcc@11.4.0 ----------------------------
-#   yrszczdtiitopfe5ner4qilpilzbb6d5 cmake@3.23.3~doc+ncurses+ownlibs~qt build_type=Release
-#   dsq7l6xf4xl6v3gqyppofgmmhpez5wo4 cmake@3.23.3~doc+ncurses+ownlibs+qt build_type=Release
-#   a3guofdikiycw4za73sjfmmuwj5ltjwr slurm@21-08-8-2~gtk~hdf5~hwloc~mariadb~pmix+readline~restd sysconfdir=PREFIX/etc
-#   jcefrlaliaqws6iiz2oepi3mpolrlotc slurm@21-08-8-2~gtk~hdf5~hwloc~mariadb~pmix+readline~restd sysconfdir=PREFIX/etc

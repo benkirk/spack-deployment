@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+#----------------------------------------------------------------------------
+# environment
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+[ -f ${SCRIPTDIR}/../spack_setup.sh ] && . ${SCRIPTDIR}/../spack_setup.sh || \
+    { echo "cannot locate ${SCRIPTDIR}/../spack_setup.sh}"; exit 1; }
+#----------------------------------------------------------------------------
+
+spack_env="${spack_deployment}-compiler-deps"
+app_name="${app_name:-fixme_appname}"
+
+# activate & probe the spack environment where we build our apps
+activate_spack_env() {
+    spack env activate ${spack_env} || exit 1
+
+    for arg in repos mirrors concretizer packages config modules compilers; do
+        spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
+    done
+    spack compilers
+
+    # clean any cruft from last step before moving on, to not fill our build stage
+    spack clean -s
+}
+
+# function to loop over outer prodcut of (compiler)x(serial packages) & (compiler)x(mpis)x(parallel packages)
+comp_spkg_ppkg_loop() {
+
+    for comp in "${COMPS[@]}"; do
+        for spkg in "${SPKGS[@]}"; do
+            #echo "spack add $spkg %$comp" >> ${app_name}.tmp
+            spack add $spkg %$comp
+        done
+        for mpi in "${MPIS[@]}"; do
+            for ppkg in "${PPKGS[@]}"; do
+                #echo "spack add $ppkg %$comp ^$mpi %$comp" >> ${app_name}.tmp
+                spack add $ppkg %$comp ^$mpi %$comp
+            done
+        done
+    done
+}
+
+build_spack_pkgs(){
+    # run a number of installs in the background
+    for bg_inst in $(seq 1 ${n_concurrent_installs}); do
+        spack install ${spack_install_flags} || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
+    done
+    # run a single install in the foreground.  try with our build flags, which could use a binary cache,
+    # but fall back to a --no-cache attempt if necessary
+    spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
+    wait
+}
+
+
+
+### BSK:
+### BSK: spack concretize --fresh \
+### BSK:     || exit 1
+### BSK:
+### BSK: # populate our source cache mirror
+### BSK: spack mirror create --directory ${spack_source_cache} --all
+### BSK:
+### BSK: # clean any cruft from last step before moving on, to not fill our build stage
+### BSK: spack clean -s
+### BSK:
+### BSK: # run a number of installs in the background
+### BSK: for bg_inst in $(seq 1 ${n_concurrent_installs}); do
+### BSK:     spack install ${spack_install_flags} || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
+### BSK: done
+### BSK: # run a single install in the foreground.  try with our build flags, which could use a binary cache,
+### BSK: # but fall back to a --no-cache attempt if necessary
+### BSK: spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
+### BSK: wait
+### BSK:
+### BSK: # build/refresh the lmod module tree
+### BSK: my_spack_refresh_lmod -y

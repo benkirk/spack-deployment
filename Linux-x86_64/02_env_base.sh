@@ -46,6 +46,7 @@ spack:
           - '%${spack_system_compiler}'
           - lmod
         include:
+          - gcc@13
           - gcc@12
           - gcc@11
           - gcc@10
@@ -117,6 +118,8 @@ spack:
     - autoconf@2.71 # https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-2021-1-beta04-HPC-Toolkit-build-error-with-loopopt/m-p/1184181
     - automake@1.16.5
     - bash@5
+    - bazel
+    - bazel@4.2.1 ^openjdk ^python@3.8
     - bc
     - binutils+ld
     - bison
@@ -127,6 +130,7 @@ spack:
     - cmake
     - curl
     - diffutils
+    - dos2unix
     - doxygen+graphviz
     - eigen
     - emacs+X+tls toolkit=gtk
@@ -136,8 +140,9 @@ spack:
     - gdb
     - gdbm
     - gettext
+    - ghostscript
     - git
-    - gimp ^highway@1.0.4 ^gettext+libxml2 # highway@1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
+    - gimp ^gettext+libxml2 ^highway@1.0.4 # highway@1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
     - gmake
     #- gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
@@ -145,7 +150,7 @@ spack:
     - intel-oneapi-mkl
     - intel-oneapi-tbb
     - intel-oneapi-vtune
-    #- julia@1.8 ^llvm@13.0.1%${spack_core_compiler} # julia requires its own patched LLVM, don't get too frustrated if trying to reconcile this with any LLVM previously installed.
+    #- julia
     - libevent
     - libszip
     - libtirpc
@@ -153,9 +158,11 @@ spack:
     - libxml2
     - lmod
     - m4
+    - matio
     - mercurial
     - meson
-    - miniconda3
+    - miniforge3@24.3.0-0-Linux-x86_64
+    #- mplayer
     - mutationpp
     - ncurses
     - ninja
@@ -166,10 +173,15 @@ spack:
     - pandoc
     - parallel
     - paraview+qt
+    - pdf2svg
     - pdsh
     - perl%${spack_core_compiler} # perl also gets built with older gcc via julia above, so fully specify so this makes it into the 'root' of our environment.
     - pkgconf
     - podman@4
+    - python@3.10
+    - python@3.11
+    - python@3.12
+    - py-ipython
     - qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
     - r+X
     - readline
@@ -191,15 +203,18 @@ spack:
     - texlive
     - tk
     - tmux
+    - tree
     - util-linux-uuid
     - util-macros
     - valgrind~boost
     - vim+gui features=huge
     - wget
+    - xxdiff
     - xz
     - zlib
     - zlib-ng
     - zsh
+    - zstd
 EOF
 
 spack env remove -y ${spack_env} 2>/dev/null
