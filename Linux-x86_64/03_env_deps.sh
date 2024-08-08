@@ -271,6 +271,9 @@ MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}")
 COMPS=("\${GCCS[@]}" "\${ONEAPIS[@]}" "\${INTELS[@]}") #"\${NVHPCS[@]}")
 EOF
 
+pwd
+cat hpc-apps-versions.cfg
+
 . hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.cfg!!"; exit 1; }
 
 
