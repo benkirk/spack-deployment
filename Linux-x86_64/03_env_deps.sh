@@ -7,7 +7,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
     { echo "cannot locate ${SCRIPTDIR}/spack_setup.sh}"; exit 1; }
 #----------------------------------------------------------------------------
 
-spack_env="${spack_deployment}-compiler-deps"
+spack_env="${spack_deployment}-hpc-apps"
 spack_yaml="spack-${spack_env}.yaml"
 
 echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
@@ -238,12 +238,12 @@ comp_spkg_ppkg_loop() {
 
     for comp in "${COMPS[@]}"; do
         for spkg in "${SPKGS[@]}"; do
-            echo "    - $spkg %$comp" >> ${spack_yaml}.tmp
+            echo "    - ${spkg} %${comp}" >> ${spack_yaml}.tmp
         done
         for mpi in "${MPIS[@]}"; do
-            echo "    - $mpi %$comp" >> ${spack_yaml}.tmp
+            echo "    - ${mpi} %${comp}" >> ${spack_yaml}.tmp
             for ppkg in "${PPKGS[@]}"; do
-                echo "    - $ppkg %$comp ^$mpi %$comp" >> ${spack_yaml}.tmp
+                echo "    - ${ppkg} %${comp} ^${mpi} %${comp}" >> ${spack_yaml}.tmp
             done
         done
     done
@@ -269,6 +269,8 @@ MPTS=( 'mpt@2.26' )
 unset MPIS COMPS SPKGS PPKGS
 MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}")
 COMPS=("\${GCCS[@]}" "\${ONEAPIS[@]}" "\${INTELS[@]}") #"\${NVHPCS[@]}")
+#---------------------------------------
+
 EOF
 
 pwd
@@ -294,19 +296,6 @@ COMPS=("${GCCS[@]}")
 PPKGS=('mpifileutils~gpfs~lustre+xattr' 'hpcg')
 comp_spkg_ppkg_loop
 
-### BSK: # Dakota & gcc@13 dont mix
-### BSK: COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0')
-### BSK: PPKGS=("dakota@6.18+mpi ^${BOOST183}")
-### BSK: unset SPKGS
-### BSK: comp_spkg_ppkg_loop
-### BSK:
-### BSK: COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' 'oneapi@2023.2.4')
-### BSK: PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
-### BSK: comp_spkg_ppkg_loop
-### BSK:
-### BSK: COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0')
-### BSK: PPKGS=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
-### BSK: comp_spkg_ppkg_loop
 ### BSK:
 ### BSK: COMPS=("${spack_system_compiler}")
 ### BSK: unset MPIS
@@ -347,5 +336,12 @@ done
 spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
 wait
 
-# build/refresh the lmod module tree
+
+
+# build/refresh the lmod module tree.  Occasionaly (v.0.22.1?) the MPIs somehow erroneoulsy
+# became implicit along the way, and no module files were generated.  So explicitly mark then last,
+# just in case.
+for mpi in "${MPIS[@]}"; do
+    spack mark --all --explicit ${mpi}
+done
 my_spack_refresh_lmod -y

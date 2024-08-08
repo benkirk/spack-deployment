@@ -27,12 +27,9 @@ activate_spack_env || exit 1
 # COMPS is a bash array of compilers to use.
 unset SPKGS
 
-COMPS=("${GCCS[@]}" "${ONEAPIS[@]}")
-PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
-comp_spkg_ppkg_loop
-
-COMPS=("${GCCS[@]}")
-PPKGS=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
+# Dakota & gcc@13 dont mix
+COMPS=('gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0')
+PPKGS=("dakota@6.18+mpi ^${BOOST183}")
 comp_spkg_ppkg_loop
 
 # --- END app-specific stuff
