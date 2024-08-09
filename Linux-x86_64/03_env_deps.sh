@@ -269,6 +269,11 @@ MPTS=( 'mpt@2.26' )
 unset MPIS COMPS SPKGS PPKGS
 MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}")
 COMPS=("\${GCCS[@]}" "\${ONEAPIS[@]}" "\${INTELS[@]}") #"\${NVHPCS[@]}")
+
+# library versions perhaps useful to pin within apps later
+BOOST183='boost@1.83+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
+BOOST='boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
+HDF5='hdf5+mpi~fortran+cxx+szip+hl'
 #---------------------------------------
 
 EOF
@@ -279,9 +284,6 @@ cat hpc-apps-versions.cfg
 . hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.cfg!!"; exit 1; }
 
 
-BOOST183='boost@1.83+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
-BOOST='boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
-HDF5='hdf5+mpi~fortran+cxx+szip+hl'
 
 SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi ^hdf5~mpi')
 SPKGS+=("${BOOST}")
