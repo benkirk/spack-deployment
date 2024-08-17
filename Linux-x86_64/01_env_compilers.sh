@@ -145,21 +145,15 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
 
 # build llvm, download aocc, intel, and nvhpc compilers
 spack add \
-      intel-oneapi-compilers@2023.2.4 %${spack_core_compiler} \
-      intel-oneapi-compilers@2024.1.0 %${spack_core_compiler} \
-      intel-oneapi-compilers-classic@2021.10.0 %${spack_core_compiler} \
+      intel-oneapi-compilers@=2023.2.4 %${spack_core_compiler} \
+      intel-oneapi-compilers@=2024.1.0 %${spack_core_compiler} \
+      intel-oneapi-compilers-classic@=2021.10.0 %${spack_core_compiler} \
       nvhpc@24 %${spack_core_compiler} \
       cuda@12 %${spack_core_compiler} \
     && spack concretize --fresh \
     || exit 1
 
-#       llvm@18+flang %${spack_core_compiler} \
-
-
-#   nvhpc@22.9 %${spack_core_compiler} \
-#   llvm@16.0.2+flang %${spack_core_compiler} \
-#   llvm@16.0.2+flang+cuda cuda_arch=80 %${spack_core_compiler} \
-#   cuda %${spack_core_compiler} \
+#       llvm@17+flang %${spack_core_compiler} \
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all

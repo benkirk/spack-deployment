@@ -29,6 +29,8 @@ spack:
       root: ${spack_view_path}/${spack_env}
       projections:
         all: '{name}/{version}'
+        cgt+dp: '{name}/{version}-dp'
+        cgt~dp: '{name}/{version}-sp'
       link: roots
       link_type: symlink
 
@@ -65,6 +67,12 @@ spack:
           environment:
             set:
               '{name}_ROOT': '{prefix}'
+
+        esp:
+          environment:
+            set:
+              '{name}_ROOT': '{prefix}/EngSketchPad'
+
         julia:
           environment:
             set:
@@ -89,10 +97,12 @@ spack:
           intel-oneapi-vtune: 'intel-vtune/{version}'
           r: 'R/{version}'
           mutationpp: 'mutation/{version}'
+          cgt+dp: '{name}/{version}-dp'
+          cgt~dp: '{name}/{version}-sp'
 
   compilers:
   - compiler:
-      spec: gcc@12.3.0
+      spec: gcc@=12.3.0
       paths:
         cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gcc
         cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/g++
@@ -114,18 +124,20 @@ spack:
 
     - apptainer~suid
     - autoconf-archive
-    - autoconf@2.69
-    - autoconf@2.71 # https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-2021-1-beta04-HPC-Toolkit-build-error-with-loopopt/m-p/1184181
-    - automake@1.16.5
+    - autoconf@=2.69
+    - autoconf@=2.71 # https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-2021-1-beta04-HPC-Toolkit-build-error-with-loopopt/m-p/1184181
+    - automake@=1.16.5
     - bash@5
     - bazel
-    - bazel@4.2.1 ^openjdk ^python@3.8
+    - bazel@=4.2.1 ^openjdk ^python@3.8
     - bc
     - binutils+ld
     - bison
     - bzip2
     #- cantera ^intel-oneapi-mkl
     - cgns
+    #- cgt~tecio+dp # tecio brings in boost which is having a problem
+    #- cgt~tecio~dp  # sp is causing a view clash...
     - charliecloud+squashfuse
     - cmake
     - curl
@@ -134,6 +146,7 @@ spack:
     - doxygen+graphviz
     - eigen
     - emacs+X+tls toolkit=gtk
+    #- esp
     - findutils
     - flex
     - gawk
@@ -142,7 +155,7 @@ spack:
     - gettext
     - ghostscript
     - git
-    - gimp ^gettext+libxml2 ^highway@1.0.4 # highway@1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
+    - gimp ^gettext+libxml2 ^highway@=1.0.4 # highway@=1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
     - gmake
     #- gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
@@ -152,6 +165,7 @@ spack:
     - intel-oneapi-vtune
     #- julia
     - libevent
+    - libfabric
     - libszip
     - libtirpc
     - libtool
@@ -161,7 +175,7 @@ spack:
     - matio
     - mercurial
     - meson
-    - miniforge3@24.3.0-0-Linux-x86_64
+    - miniforge3@=24.3.0-0-Linux-x86_64
     #- mplayer
     - mutationpp
     - ncurses
@@ -178,6 +192,8 @@ spack:
     - perl%${spack_core_compiler} # perl also gets built with older gcc via julia above, so fully specify so this makes it into the 'root' of our environment.
     - pkgconf
     - podman@4
+    - python@3.8 # <-- required for VTK@8.2.1a later
+    - python@3.9
     - python@3.10
     - python@3.11
     - python@3.12
@@ -198,12 +214,12 @@ spack:
     - tar
     - tcl
     - tcsh
-    #- tecplot
     - texinfo
     - texlive
     - tk
     - tmux
     - tree
+    - ucx
     - util-linux-uuid
     - util-macros
     - valgrind~boost
