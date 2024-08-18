@@ -168,8 +168,7 @@ EOF
                 vers=$(echo ${inst_vers_hash_path} | rev | cut -d - -f4- | rev)
                 echo "${pkg} : ${inst_vers_hash_path} --> ${vers}"
                 cat >> fixed_packages.yaml <<EOF
-      - "@=${vers}"
-      - "%${spack_core_compiler}"
+      - "@=${vers}%${spack_core_compiler}"
 EOF
                 #break
             done

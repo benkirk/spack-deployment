@@ -20,13 +20,6 @@ spack:
       root: ${spack_pkg_install_path}
       projections:
           all: '{name}/{version}-{hash:7}-{compiler.name}-{compiler.version}'
-          ^mpi: '{name}/{version}-{hash:7}-{^mpi.name}-{^mpi.version}-{compiler.name}-{compiler.version}'
-          gcc: '{name}/{version}'
-          llvm: '{name}/{version}'
-          nvhpc: '{name}/{version}'
-          cuda: '{name}/{version}'
-          intel-oneapi-compilers: '{name}/{version}'
-          intel-oneapi-compilers-classic: '{name}/{version}'
 
   concretizer:
     unify: false
