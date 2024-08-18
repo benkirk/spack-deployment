@@ -133,12 +133,12 @@ spack:
         prefix: /usr
 
     all:
-      compiler: [${spack_core_compiler}]
+      compiler:: [${spack_core_compiler}]
       providers:
-        blas:      [intel-oneapi-mkl]
-        lapack:    [intel-oneapi-mkl]
-        scalapack: [intel-oneapi-mkl]
-        tbb:       [intel-oneapi-tbb]
+        blas::      [intel-oneapi-mkl]
+        lapack::    [intel-oneapi-mkl]
+        scalapack:: [intel-oneapi-mkl]
+        tbb::       [intel-oneapi-tbb]
 
       variants: [~mpi, +fortran] # make sure mpi doesn't sneak in through hdf5 (to paraview), or any sub-package.  enable fortran where applicable.
 
