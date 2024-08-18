@@ -149,6 +149,36 @@ EOF
 
 
 
+my_build_required_pkgs()
+{
+    [ $# -ge 2 ] || { echo "usage: to my_build_fixed_pkgs /path/to/installs pkg1 pkg2 ..."; exit 1; }
+    local inst_path=$1 && shift
+    [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_pkgs must be an installation path!!"; exit 1; }
+
+    echo "# packages pinned to existing versions follow..." > fixed_packages.yaml
+    for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
+        if [ ! -d ${inst_path}/${pkg} ]; then
+            >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"
+        else
+            cat >> fixed_packages.yaml <<EOF
+    ${pkg}:
+      require:
+EOF
+            for inst_vers_hash_path in $(cd ${inst_path}/${pkg} ; ls -dtr *-gcc-${spack_core_gcc_version} | sort); do
+                vers=$(echo ${inst_vers_hash_path} | rev | cut -d - -f4- | rev)
+                echo "${pkg} : ${inst_vers_hash_path} --> ${vers}"
+                cat >> fixed_packages.yaml <<EOF
+      - "@=${vers}"
+      - "%${spack_core_compiler}"
+EOF
+                #break
+            done
+        fi
+    done
+}
+
+
+
 my_build_fixed_pkgs()
 {
     [ $# -ge 2 ] || { echo "usage: to my_build_fixed_pkgs /path/to/installs pkg1 pkg2 ..."; exit 1; }

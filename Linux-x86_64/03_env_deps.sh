@@ -220,13 +220,13 @@ spack:
 
   packages:
     all:
-      compiler: [${spack_core_compiler}]
+      compiler:: [ ${spack_core_compiler}, gcc, oneapi, intel ]
       providers:
-        blas:      [intel-oneapi-mkl]
-        lapack:    [intel-oneapi-mkl]
-        scalapack: [intel-oneapi-mkl]
-        tbb:       [intel-oneapi-tbb]
-        mpi:       [openmpi, mpich, intel-oneapi-mpi, mpt]
+        blas::      [intel-oneapi-mkl]
+        lapack::    [intel-oneapi-mkl]
+        scalapack:: [intel-oneapi-mkl]
+        tbb::       [intel-oneapi-tbb]
+        mpi::       [openmpi, mpich, intel-oneapi-mpi, mpt]
 
     boost:
       require: [+atomic, +chrono, +date_time, +filesystem, +graph, +json, +log, +math, +multithreaded, +program_options, +random, +regex, +serialization, +shared, +signals, +stacktrace, +system, +timer, cxxstd=11]
