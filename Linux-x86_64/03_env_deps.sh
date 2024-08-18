@@ -234,9 +234,8 @@ spack:
 EOF
 
 
-#my_build_fixed_pkgs \
-my_build_fixed_externals \
-    ${spack_pkg_install_path} \
+my_build_required_pkgs \
+    "${spack_deployment}-base" \
     cmake autoconf libtool automake openssh perl findutils diffutils m4 curl tar pkgconf util-macros libszip \
     gmake gettext numactl libxml2 zlib zlib-ng zstd xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
     openssl libevent texinfo autoconf-archive libtirpc tcsh \
@@ -284,7 +283,7 @@ NVHPCS=( 'nvhpc@=24.3' )
 MPTS=( 'mpt@=2.26' )
 
 unset MPIS COMPS SPKGS PPKGS
-MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}" "\${INTELMPIS[@]}" )
+MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}") # "\${INTELMPIS[@]}" )
 COMPS=("\${GCCS[@]}" "\${ONEAPIS[@]}" "\${INTELS[@]}") #"\${NVHPCS[@]}")
 
 # library versions perhaps useful to pin within apps later
@@ -307,7 +306,7 @@ SPKGS+=("${BOOST}")
 #SPKGS+=("${BOOST183}")
 
 PPKGS=('hdf5+mpi')
-PPKGS+=('netcdf+mpi' 'mpl') #'hpl' 'osu-micro-benchmarks' )
+#PPKGS+=('netcdf+mpi' 'mpl') #'hpl' 'osu-micro-benchmarks' )
 comp_spkg_ppkg_loop
 
 # Weed out all the duplicates
@@ -342,12 +341,3 @@ build_spack_pkgs
 #     spack mark --all --explicit ${mpi}
 # done
 my_spack_refresh_lmod -y
-
-
-# Now, we've installed all the MPIs we want in this environment.
-# set mpi:buildable:False, this will force any/all apps installed
-# later to use one of the existing MPIs instead of building a new one.
-# - yep, seen that before...
-#spack config add 'packages:mpi:buildable:False'
-#spack config add 'packages:mpich:buildable:False'
-#spack config add 'packages:openmpi:buildable:False'

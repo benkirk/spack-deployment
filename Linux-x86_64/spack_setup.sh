@@ -115,85 +115,69 @@ build_spack_pkgs() {
 
 
 
-# shell function to take a list of previously installed packages and treat
-# them as fixed externals
-# crazy cmd to strip '-hash:7-gcc-version' : echo 23-11-1-1-vwbuow5-gcc-12.3.0 | rev | cut -d - -f4- | rev
-my_build_fixed_externals()
-{
-    [ $# -ge 2 ] || { echo "usage: to my_build_fixed_externals /path/to/installs pkg1 pkg2 ..."; exit 1; }
-    local inst_path=$1 && shift
-    [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_externals must be an installation path!!"; exit 1; }
+# # shell function to take a list of previously installed packages and treat
+# # them as fixed externals
+# # crazy cmd to strip '-hash:7-gcc-version' : echo 23-11-1-1-vwbuow5-gcc-12.3.0 | rev | cut -d - -f4- | rev
+# my_build_fixed_externals()
+# {
+#     [ $# -ge 2 ] || { echo "usage: to my_build_fixed_externals /path/to/installs pkg1 pkg2 ..."; exit 1; }
+#     local inst_path=$1 && shift
+#     [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_externals must be an installation path!!"; exit 1; }
 
-    #echo "  packages:" > fixed_packages.yaml
-    echo "# fixed external packages follow..." > fixed_packages.yaml
-    for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
-        if [ ! -d ${inst_path}/${pkg} ]; then
-            >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"
-        else
-            cat >> fixed_packages.yaml <<EOF
-    ${pkg}:
-      buildable: False
-      externals:
-EOF
-            for inst_vers_hash_path in $(cd ${inst_path}/${pkg} ; ls -dtr *-gcc-${spack_core_gcc_version} | sort); do
-                vers=$(echo ${inst_vers_hash_path} | rev | cut -d - -f4- | rev)
-                #echo "${pkg} : ${inst_vers_hash_path} --> ${vers}"
-                cat >> fixed_packages.yaml <<EOF
-      - spec: ${pkg}@=${vers}
-        prefix: ${inst_path}/${pkg}/${inst_vers_hash_path}
-EOF
-            done
-        fi
-    done
-}
+#     #echo "  packages:" > fixed_packages.yaml
+#     echo "# fixed external packages follow..." > fixed_packages.yaml
+#     for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
+#         if [ ! -d ${inst_path}/${pkg} ]; then
+#             >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"
+#         else
+#             cat >> fixed_packages.yaml <<EOF
+#     ${pkg}:
+#       buildable: False
+#       externals:
+# EOF
+#             for inst_vers_hash_path in $(cd ${inst_path}/${pkg} ; ls -dtr *-gcc-${spack_core_gcc_version} | sort); do
+#                 vers=$(echo ${inst_vers_hash_path} | rev | cut -d - -f4- | rev)
+#                 #echo "${pkg} : ${inst_vers_hash_path} --> ${vers}"
+#                 cat >> fixed_packages.yaml <<EOF
+#       - spec: ${pkg}@=${vers}
+#         prefix: ${inst_path}/${pkg}/${inst_vers_hash_path}
+# EOF
+#             done
+#         fi
+#     done
+# }
 
 
 
 my_build_required_pkgs()
 {
-    [ $# -ge 2 ] || { echo "usage: to my_build_fixed_pkgs /path/to/installs pkg1 pkg2 ..."; exit 1; }
-    local inst_path=$1 && shift
-    [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_pkgs must be an installation path!!"; exit 1; }
+    [ $# -ge 2 ] || { echo "usage: to my_build_required_pkgs <SPACK_SEARCH_ENVIRONMENT> pkg1 pkg2 ..."; exit 1; }
+    local spack_search_env=$1 && shift
+    spack env activate ${spack_search_env} || { echo "spacktivate ${spack_search_env} failed!!" ; exit 1; }
 
+    echo "Locating fixed externals from environment ${spack_search_env}..."
     echo "# packages pinned to existing versions follow..." > fixed_packages.yaml
-    for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
-        if [ ! -d ${inst_path}/${pkg} ]; then
-            >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"
-        else
-            cat >> fixed_packages.yaml <<EOF
-    ${pkg}:
-      require:
-EOF
-            for inst_vers_hash_path in $(cd ${inst_path}/${pkg} ; ls -dtr *-gcc-${spack_core_gcc_version} | sort); do
-                vers=$(echo ${inst_vers_hash_path} | rev | cut -d - -f4- | rev)
-                echo "${pkg} : ${inst_vers_hash_path} --> ${vers}"
-                cat >> fixed_packages.yaml <<EOF
-      - "@=${vers}%${spack_core_compiler}"
-EOF
-                #break
-            done
-        fi
-    done
-}
 
+    for requested_pkg in $(echo ${@} | tr " " "\n" | sort | uniq); do
 
-
-my_build_fixed_pkgs()
-{
-    [ $# -ge 2 ] || { echo "usage: to my_build_fixed_pkgs /path/to/installs pkg1 pkg2 ..."; exit 1; }
-    local inst_path=$1 && shift
-    [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_pkgs must be an installation path!!"; exit 1; }
-
-    echo "# non-buildable packages follow..." > fixed_packages.yaml
-    for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
-        if [ ! -d ${inst_path}/${pkg} ]; then
-            >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"
-        else
-            cat >> fixed_packages.yaml <<EOF
-    ${pkg}:
+        cat >> fixed_packages.yaml <<EOF
+    ${requested_pkg}:
       buildable: False
+      externals:
 EOF
-        fi
+        while read pkg_hash; do
+
+            #echo ${pkg_hash}
+            pkg_spec="$(spack find --format "{name}@={version}" "/${pkg_hash}")"
+            pkg_path="$(spack location --install-dir "/${pkg_hash}")"
+
+            echo "  --> ${pkg_spec} ${pkg_path}"
+
+            cat >> fixed_packages.yaml <<EOF
+      - spec: ${pkg_spec}
+        prefix: ${pkg_path}
+EOF
+        done < <(spack find --format {hash} ${requested_pkg})
     done
 }
 
