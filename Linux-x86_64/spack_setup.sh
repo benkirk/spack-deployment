@@ -19,7 +19,7 @@ done
 #----------------------------------------------------------------------------
 # environment
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/conf/${spack_system_cfg} ] && . ${SCRIPTDIR}/conf/${spack_system_cfg} || \
+[ -f ${SCRIPTDIR}/conf/${spack_system_cfg} ] && source ${SCRIPTDIR}/conf/${spack_system_cfg} || \
 	{ echo "cannot locate ${SCRIPTDIR}/conf/${spack_system_cfg}"; exit 1; }
 #----------------------------------------------------------------------------
 
@@ -96,34 +96,78 @@ cat ~/spack_modules_${spack_deployment}.sh
 }
 
 
+# shell fucntion to build spack packages, after
+# they have been added & concretized in an active environment
+build_spack_pkgs() {
+
+    # run a number of installs in the background
+    for bg_inst in $(seq 1 ${n_concurrent_installs}); do
+        # install (possibly from cache), if fails potentially try again ignoring cache
+        spack install ${spack_install_flags} \
+            || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
+    done
+
+    # run a single install in the foreground.  try with our build flags, which could use a binary cache,
+    # but fall back to a --no-cache attempt if necessary
+    spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
+    wait
+}
+
+
+
 # shell function to take a list of previously installed packages and treat
 # them as fixed externals
+# crazy cmd to strip '-hash:7-gcc-version' : echo 23-11-1-1-vwbuow5-gcc-12.3.0 | rev | cut -d - -f4- | rev
 my_build_fixed_externals()
 {
     [ $# -ge 2 ] || { echo "usage: to my_build_fixed_externals /path/to/installs pkg1 pkg2 ..."; exit 1; }
     local inst_path=$1 && shift
     [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_externals must be an installation path!!"; exit 1; }
 
-    #echo "  packages:" > fixed_externals.yaml
-    echo "# fixed external packages follow..." > fixed_externals.yaml
+    #echo "  packages:" > fixed_packages.yaml
+    echo "# fixed external packages follow..." > fixed_packages.yaml
     for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
         if [ ! -d ${inst_path}/${pkg} ]; then
             >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"
         else
-            cat >> fixed_externals.yaml <<EOF
+            cat >> fixed_packages.yaml <<EOF
     ${pkg}:
       buildable: False
       externals:
 EOF
-            for vers in $(cd ${inst_path}/${pkg} ; ls | sort); do
-                cat >> fixed_externals.yaml <<EOF
-      - spec: ${pkg}@${vers}
-        prefix: ${inst_path}/${pkg}/${vers}
+            for inst_vers_hash_path in $(cd ${inst_path}/${pkg} ; ls -dtr *-gcc-${spack_core_gcc_version} | sort); do
+                vers=$(echo ${inst_vers_hash_path} | rev | cut -d - -f4- | rev)
+                #echo "${pkg} : ${inst_vers_hash_path} --> ${vers}"
+                cat >> fixed_packages.yaml <<EOF
+      - spec: ${pkg}@=${vers}
+        prefix: ${inst_path}/${pkg}/${inst_vers_hash_path}
 EOF
             done
         fi
     done
 }
+
+
+
+my_build_fixed_pkgs()
+{
+    [ $# -ge 2 ] || { echo "usage: to my_build_fixed_pkgs /path/to/installs pkg1 pkg2 ..."; exit 1; }
+    local inst_path=$1 && shift
+    [ -d ${inst_path} ] || { echo "first argument to my_build_fixed_pkgs must be an installation path!!"; exit 1; }
+
+    echo "# non-buildable packages follow..." > fixed_packages.yaml
+    for pkg in $(echo $@ | tr " " "\n" | sort | uniq); do
+        if [ ! -d ${inst_path}/${pkg} ]; then
+            >&2 echo "Skipping ${pkg} (no such directory: ${inst_path}/${pkg})"
+        else
+            cat >> fixed_packages.yaml <<EOF
+    ${pkg}:
+      buildable: False
+EOF
+        fi
+    done
+}
+
 
 
 # shell function to update our buildcache with any new packages
@@ -161,11 +205,21 @@ my_spack_update_buildcache()
 
 
 
+# shell function to list spack configs, intended to be used inside an activated environment
+show_spack_configs()
+{
+    for arg in repos mirrors concretizer packages config modules compilers; do
+        spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
+    done
+}
+
+
+
 # navigate to our clone directory and set up the spack environment
 cd ${spack_clone_path} && pwd && . share/spack/setup-env.sh || exit 1
 
 [ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add mysrcmirror ${spack_source_cache}
 [ -d ${spack_build_cache}                 ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
 
-mkdir -p ${SPACK_BASE}/build && cd ${SPACK_BASE}/build && echo "pwd=$(pwd)" || exit 1
+mkdir -p ${spack_build_path} && cd ${spack_build_path} && echo "pwd=$(pwd)" || exit 1
 echo "Finished initalization from ${SCRIPTDIR}/spack_setup.sh"
