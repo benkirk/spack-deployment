@@ -3,7 +3,7 @@
 #----------------------------------------------------------------------------
 # environment
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/spack_setup.sh ] && . ${SCRIPTDIR}/spack_setup.sh || \
+[ -f ${SCRIPTDIR}/spack_setup.sh ] && source ${SCRIPTDIR}/spack_setup.sh || \
     { echo "cannot locate ${SCRIPTDIR}/spack_setup.sh}"; exit 1; }
 #----------------------------------------------------------------------------
 
@@ -97,7 +97,7 @@ EOF
 my_build_fixed_externals \
     ${spack_view_path}/${spack_deployment}-base \
     bc cmake gmake curl perl tar \
-    && echo "Fixed Externals:" && cat fixed_externals.yaml | tee -a ${spack_yaml}
+    && echo "Fixed Externals:" && cat fixed_packages.yaml | tee -a ${spack_yaml}
 
 cat >>${spack_yaml} <<EOF
   specs:

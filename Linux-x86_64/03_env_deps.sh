@@ -3,7 +3,7 @@
 #----------------------------------------------------------------------------
 # environment
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/spack_setup.sh ] && . ${SCRIPTDIR}/spack_setup.sh || \
+[ -f ${SCRIPTDIR}/spack_setup.sh ] && source ${SCRIPTDIR}/spack_setup.sh || \
     { echo "cannot locate ${SCRIPTDIR}/spack_setup.sh}"; exit 1; }
 #----------------------------------------------------------------------------
 
@@ -18,10 +18,16 @@ spack:
   config:
     build_stage: ${spack_build_stage_path}
     install_tree:
-      root: ${spack_clone_path}/${spack_env}
+      root: ${spack_pkg_install_path}
       projections:
           all: '{name}/{version}-{hash:7}-{compiler.name}-{compiler.version}'
           ^mpi: '{name}/{version}-{hash:7}-{^mpi.name}-{^mpi.version}-{compiler.name}-{compiler.version}'
+          gcc: '{name}/{version}'
+          llvm: '{name}/{version}'
+          nvhpc: '{name}/{version}'
+          cuda: '{name}/{version}'
+          intel-oneapi-compilers: '{name}/{version}'
+          intel-oneapi-compilers-classic: '{name}/{version}'
 
   concretizer:
     unify: false
@@ -58,6 +64,7 @@ spack:
               '{name}_ROOT': '{prefix}'
         projections:
           hdf5+mpi: '{name}-mpi/{version}'
+          netcdf+mpi: '{name}-mpi/{version}'
 
   view:
     my_view:
@@ -70,12 +77,12 @@ spack:
 
   compilers:
   - compiler:
-      spec: gcc@13.2.0
+      spec: gcc@=13.2.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/13.2.0/bin/gfortran
+        cc: ${spack_pkg_install_path}/gcc/13.2.0/bin/gcc
+        cxx: ${spack_pkg_install_path}/gcc/13.2.0/bin/g++
+        f77: ${spack_pkg_install_path}/gcc/13.2.0/bin/gfortran
+        fc: ${spack_pkg_install_path}/gcc/13.2.0/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -84,12 +91,12 @@ spack:
       extra_rpaths: []
 
   - compiler:
-      spec: gcc@12.3.0
+      spec: gcc@=12.3.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
+        cc: ${spack_pkg_install_path}/gcc/12.3.0/bin/gcc
+        cxx: ${spack_pkg_install_path}/gcc/12.3.0/bin/g++
+        f77: ${spack_pkg_install_path}/gcc/12.3.0/bin/gfortran
+        fc: ${spack_pkg_install_path}/gcc/12.3.0/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -98,12 +105,12 @@ spack:
       extra_rpaths: []
 
   - compiler:
-      spec: gcc@11.4.0
+      spec: gcc@=11.4.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.4.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.4.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.4.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/11.4.0/bin/gfortran
+        cc: ${spack_pkg_install_path}/gcc/11.4.0/bin/gcc
+        cxx: ${spack_pkg_install_path}/gcc/11.4.0/bin/g++
+        f77: ${spack_pkg_install_path}/gcc/11.4.0/bin/gfortran
+        fc: ${spack_pkg_install_path}/gcc/11.4.0/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -112,12 +119,12 @@ spack:
       extra_rpaths: []
 
   - compiler:
-      spec: gcc@10.5.0
+      spec: gcc@=10.5.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.5.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.5.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.5.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/10.5.0/bin/gfortran
+        cc: ${spack_pkg_install_path}/gcc/10.5.0/bin/gcc
+        cxx: ${spack_pkg_install_path}/gcc/10.5.0/bin/g++
+        f77: ${spack_pkg_install_path}/gcc/10.5.0/bin/gfortran
+        fc: ${spack_pkg_install_path}/gcc/10.5.0/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -140,29 +147,29 @@ spack:
       extra_rpaths: []
 
   - compiler:
-      spec: nvhpc@24.3
+      spec: nvhpc@=24.3
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvc++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvfortran
+        cc: ${spack_pkg_install_path}/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvc
+        cxx: ${spack_pkg_install_path}/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvc++
+        f77: ${spack_pkg_install_path}/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvfortran
+        fc: ${spack_pkg_install_path}/nvhpc/24.3/Linux_x86_64/24.3/compilers/bin/nvfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
       modules: []
       environment:
         prepend_path:
-          PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin
+          PATH: ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/bin
       extra_rpaths:
-        - ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64
+        - ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/lib64
 
   - compiler:
-      spec: oneapi@2023.2.4
+      spec: oneapi@=2023.2.4
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/icx
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/icpx
-        f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
-        fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
+        cc: ${spack_pkg_install_path}/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/icx
+        cxx: ${spack_pkg_install_path}/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/icpx
+        f77: ${spack_pkg_install_path}/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
+        fc: ${spack_pkg_install_path}/intel-oneapi-compilers/2023.2.4/compiler/latest/linux/bin/ifx
       flags:
         cflags: -lpthread
         cxxflags: -lpthread
@@ -171,17 +178,17 @@ spack:
       modules: []
       environment:
         prepend_path:
-          PATH: ${spack_view_path}/${spack_deployment}-base/gmake/4.3/bin
+          PATH: ${spack_pkg_install_path}-base/gmake/4.3/bin
       extra_rpaths:
-        - ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64
+        - ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/lib64
 
   - compiler:
-      spec: intel@2021.10.0
+      spec: intel@=2021.10.0
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers-classic/2021.10.0/bin/icc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers-classic/2021.10.0/bin/icpc
-        f77: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers-classic/2021.10.0/bin/ifort
-        fc: ${spack_view_path}/${spack_deployment}-compilers/intel-oneapi-compilers-classic/2021.10.0/bin/ifort
+        cc: ${spack_pkg_install_path}/intel-oneapi-compilers-classic/2021.10.0/bin/icc
+        cxx: ${spack_pkg_install_path}/intel-oneapi-compilers-classic/2021.10.0/bin/icpc
+        f77: ${spack_pkg_install_path}/intel-oneapi-compilers-classic/2021.10.0/bin/ifort
+        fc: ${spack_pkg_install_path}/intel-oneapi-compilers-classic/2021.10.0/bin/ifort
       flags:
         cflags: -lpthread
         cxxflags: -lpthread
@@ -190,44 +197,60 @@ spack:
       modules: []
       environment:
         prepend_path:
-          PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin
+          PATH: ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/bin
       extra_rpaths:
-        - ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64
+        - ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/lib64
 
 #  - compiler:
-#      spec: clang@15.0.4
+#      spec: clang@=15.0.4
 #      paths:
-#        cc: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/clang
-#        cxx: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/clang++
-#        f77: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
-#        fc: ${spack_view_path}/${spack_deployment}-compilers/llvm/15.0.4/bin/flang-new
+#        cc: ${spack_pkg_install_path}/llvm/15.0.4/bin/clang
+#        cxx: ${spack_pkg_install_path}/llvm/15.0.4/bin/clang++
+#        f77: ${spack_pkg_install_path}/llvm/15.0.4/bin/flang-new
+#        fc: ${spack_pkg_install_path}/llvm/15.0.4/bin/flang-new
 #      flags: {}
 #      operating_system: ${os_version}
 #      target: x86_64
 #      modules: []
 #      environment:
 #        prepend_path:
-#          PATH: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin
+#          PATH: ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/bin
 #      extra_rpaths:
-#        - ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/lib64
+#        - ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/lib64
 
   packages:
-    hdf5:
-      variants: [+fortran, +cxx, +szip, +hl]
-    openmpi:
-      require: [+legacylaunchers, schedulers=slurm]
-    mpich:
-      require: [+slurm]
     all:
       compiler: [${spack_core_compiler}]
+      providers:
+        blas:      [intel-oneapi-mkl]
+        lapack:    [intel-oneapi-mkl]
+        scalapack: [intel-oneapi-mkl]
+        tbb:       [intel-oneapi-tbb]
+        mpi:       [openmpi, mpich, intel-oneapi-mpi, mpt]
+
+    boost:
+      require: [+atomic, +chrono, +date_time, +filesystem, +graph, +json, +log, +math, +multithreaded, +program_options, +random, +regex, +serialization, +shared, +signals, +stacktrace, +system, +timer, cxxstd=11]
+    hdf5:
+      require: [+fortran, +cxx, +szip, +hl]
+    intel-oneapi-mpi:
+      require: [+generic-names]
+    mpich:
+      require: [+slurm]
+    openmpi:
+      require: [+legacylaunchers, schedulers=slurm]
 EOF
 
+
+#my_build_fixed_pkgs \
 my_build_fixed_externals \
-    ${spack_view_path}/${spack_deployment}-base \
-    cmake autoconf libtool automake slurm openssh perl findutils diffutils m4 curl tar pkgconf util-macros libszip \
+    ${spack_pkg_install_path} \
+    cmake autoconf libtool automake openssh perl findutils diffutils m4 curl tar pkgconf util-macros libszip \
     gmake gettext numactl libxml2 zlib zlib-ng zstd xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
-    openssl libevent texinfo autoconf-archive \
-    && echo "Fixed Externals:" && cat fixed_externals.yaml | tee -a ${spack_yaml}
+    openssl libevent texinfo autoconf-archive libtirpc tcsh \
+    libfabric ucx python \
+    slurm \
+    && echo "Fixed Externals:" && cat fixed_packages.yaml | tee -a ${spack_yaml}
+
 cat >>${spack_yaml} <<EOF
   specs:
     - lmod%${spack_core_compiler}
@@ -241,9 +264,9 @@ comp_spkg_ppkg_loop() {
             echo "    - ${spkg} %${comp}" >> ${spack_yaml}.tmp
         done
         for mpi in "${MPIS[@]}"; do
-            echo "    - ${mpi} %${comp}" >> ${spack_yaml}.tmp
+            echo "    - ${mpi}%${comp}" >> ${spack_yaml}.tmp
             for ppkg in "${PPKGS[@]}"; do
-                echo "    - ${ppkg} %${comp} ^${mpi} %${comp}" >> ${spack_yaml}.tmp
+                echo "    - ${ppkg} %${comp} ^${mpi}%${comp}" >> ${spack_yaml}.tmp
             done
         done
     done
@@ -258,22 +281,23 @@ cat <<EOF > hpc-apps-versions.cfg
 # building hpc-apps
 # (automatically generated by ${0})
 
-MPICHS=( 'mpich@4+slurm' )
-OPENMPIS=( 'openmpi@5+legacylaunchers schedulers=slurm' )
-GCCS=( 'gcc@10.5.0' 'gcc@11.4.0' 'gcc@12.3.0' 'gcc@13.2.0' )
-ONEAPIS=( 'oneapi@2023.2.4' )
-INTELS=( 'intel@2021.10.0' )
-NVHPCS=( 'nvhpc@24.3' )
-MPTS=( 'mpt@2.26' )
+MPICHS=( 'mpich@4' )
+OPENMPIS=( 'openmpi@5' )
+INTELMPIS=( 'intel-oneapi-mpi@2021' )
+GCCS=( 'gcc@11.4.0' 'gcc@=12.3.0' 'gcc@13.2.0' )
+ONEAPIS=( 'oneapi@=2023.2.4' )
+INTELS=( 'intel@=2021.10.0' )
+NVHPCS=( 'nvhpc@=24.3' )
+MPTS=( 'mpt@=2.26' )
 
 unset MPIS COMPS SPKGS PPKGS
-MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}")
+MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}" "\${INTELMPIS[@]}" )
 COMPS=("\${GCCS[@]}" "\${ONEAPIS[@]}" "\${INTELS[@]}") #"\${NVHPCS[@]}")
 
 # library versions perhaps useful to pin within apps later
-BOOST183='boost@1.83+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
-BOOST='boost+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
-HDF5='hdf5+mpi~fortran+cxx+szip+hl'
+BOOST183='boost@=1.83.0' #+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
+BOOST='boost' #+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
+HDF5='hdf5+mpi+fortran+cxx+szip+hl'
 #---------------------------------------
 
 EOF
@@ -281,29 +305,17 @@ EOF
 pwd
 cat hpc-apps-versions.cfg
 
-. hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.cfg!!"; exit 1; }
+source hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.cfg!!"; exit 1; }
 
-
-
-SPKGS=('hdf5~mpi+fortran+cxx+szip+hl' 'openblas threads=openmp' 'highfive~mpi ^hdf5~mpi')
-SPKGS+=("${BOOST}")
-SPKGS+=("${BOOST183}")
+SPKGS=( 'hdf5~mpi')
+SPGGS+=( 'highfive~mpi ^hdf5~mpi')
 SPKGS+=('netcdf~mpi ^hdf5~mpi')
+SPKGS+=("${BOOST}")
+#SPKGS+=("${BOOST183}")
 
-PPKGS=( "${HDF5}" 'hpl ^intel-oneapi-mkl' 'osu-micro-benchmarks' 'mpl' )
+PPKGS=( 'hdf5+mpi' )
+PPKGS+=( 'netcdf+mpi ^hdf5+mpi' 'mpl' ) #'hpl' 'osu-micro-benchmarks' )
 comp_spkg_ppkg_loop
-
-unset SPKGS
-COMPS=("${GCCS[@]}")
-PPKGS=('mpifileutils~gpfs~lustre+xattr' 'hpcg')
-comp_spkg_ppkg_loop
-
-### BSK:
-### BSK: COMPS=("${spack_system_compiler}")
-### BSK: unset MPIS
-### BSK: SPKGS=('netcdf~mpi ^hdf5~mpi')
-### BSK: unset PPKGS
-### BSK: comp_spkg_ppkg_loop
 
 # Weed out all the duplicates
 cat ${spack_yaml}.tmp | sort | uniq >> ${spack_yaml} && rm -f ${spack_yaml}.tmp
@@ -315,9 +327,7 @@ spack env remove -y ${spack_env} 2>/dev/null
 spack mark --all --implicit
 spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
 spack env activate ${spack_env}
-for arg in repos mirrors concretizer packages config modules compilers; do
-    spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
-done
+show_spack_configs
 spack compilers
 
 spack concretize --fresh \
@@ -330,15 +340,7 @@ spack mirror create --directory ${spack_source_cache} --all
 spack clean -s
 
 # run a number of installs in the background
-for bg_inst in $(seq 1 ${n_concurrent_installs}); do
-    spack install ${spack_install_flags} || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
-done
-# run a single install in the foreground.  try with our build flags, which could use a binary cache,
-# but fall back to a --no-cache attempt if necessary
-spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
-wait
-
-
+build_spack_pkgs
 
 # build/refresh the lmod module tree.  Occasionaly (v.0.22.1?) the MPIs somehow erroneoulsy
 # became implicit along the way, and no module files were generated.  So explicitly mark then last,
@@ -347,3 +349,12 @@ for mpi in "${MPIS[@]}"; do
     spack mark --all --explicit ${mpi}
 done
 my_spack_refresh_lmod -y
+
+
+# Now, we've installed all the MPIs we want in this environment.
+# set mpi:buildable:False, this will force any/all apps installed
+# later to use one of the existing MPIs instead of building a new one.
+# - yep, seen that before...
+#spack config add 'packages:mpi:buildable:False'
+#spack config add 'packages:mpich:buildable:False'
+#spack config add 'packages:openmpi:buildable:False'

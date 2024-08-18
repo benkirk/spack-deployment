@@ -3,7 +3,7 @@ set +x
 #----------------------------------------------------------------------------
 # environment
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/spack_setup.sh ] && . ${SCRIPTDIR}/spack_setup.sh || \
+[ -f ${SCRIPTDIR}/spack_setup.sh ] && source ${SCRIPTDIR}/spack_setup.sh || \
     { echo "cannot locate ${SCRIPTDIR}/spack_setup.sh"; exit 1; }
 #----------------------------------------------------------------------------
 
@@ -17,9 +17,16 @@ spack:
   config:
     build_stage: ${spack_build_stage_path}
     install_tree:
-      root: ${spack_clone_path}/${spack_env}
+      root: ${spack_pkg_install_path}
       projections:
-          all: '{name}/{version}-{hash:7}'
+          all: '{name}/{version}-{hash:7}-{compiler.name}-{compiler.version}'
+          ^mpi: '{name}/{version}-{hash:7}-{^mpi.name}-{^mpi.version}-{compiler.name}-{compiler.version}'
+          gcc: '{name}/{version}'
+          llvm: '{name}/{version}'
+          nvhpc: '{name}/{version}'
+          cuda: '{name}/{version}'
+          intel-oneapi-compilers: '{name}/{version}'
+          intel-oneapi-compilers-classic: '{name}/{version}'
 
   concretizer:
     unify: false
@@ -102,12 +109,12 @@ spack:
 
   compilers:
   - compiler:
-      spec: gcc@=12.3.0
+      spec: gcc@=${spack_core_gcc_version}
       paths:
-        cc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gcc
-        cxx: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/g++
-        f77: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
-        fc: ${spack_view_path}/${spack_deployment}-compilers/gcc/12.3.0/bin/gfortran
+        cc: ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/bin/gcc
+        cxx: ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/bin/g++
+        f77: ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/bin/gfortran
+        fc: ${spack_pkg_install_path}/gcc/${spack_core_gcc_version}/bin/gfortran
       flags: {}
       operating_system: ${os_version}
       target: x86_64
@@ -116,8 +123,23 @@ spack:
       extra_rpaths: []
 
   packages:
+    mpi:
+      buildable: False # No MPIs at all in step-02
+
+    opengl:
+      buildable: False
+      externals:
+      - spec: opengl@4.5.0
+        prefix: /usr
+
     all:
       compiler: [${spack_core_compiler}]
+      providers:
+        blas:      [intel-oneapi-mkl]
+        lapack:    [intel-oneapi-mkl]
+        scalapack: [intel-oneapi-mkl]
+        tbb:       [intel-oneapi-tbb]
+
       variants: [~mpi, +fortran] # make sure mpi doesn't sneak in through hdf5 (to paraview), or any sub-package.  enable fortran where applicable.
 
   specs:
@@ -199,7 +221,7 @@ spack:
     - python@3.12
     - py-ipython
     - qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
-    - r+X
+    #- r+X
     - readline
     - rsync
     - ruby
@@ -238,9 +260,7 @@ spack mark --all --implicit
 spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
 spack env activate ${spack_env}
 #spack external find --not-buildable openssl ncurses #perl
-for arg in repos mirrors concretizer packages config modules compilers; do
-    spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
-done
+show_spack_configs
 spack compilers
 
 # occasionally, packages fail download with
@@ -264,13 +284,7 @@ spack concretize --fresh \
 spack mirror create --directory ${spack_source_cache} --all
 
 # run a number of installs in the background
-for bg_inst in $(seq 1 ${n_concurrent_installs}); do
-    spack install ${spack_install_flags} || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
-done
-# run a single install in the foreground.  try with our build flags, which could use a binary cache,
-# but fall back to a --no-cache attempt if necessary
-spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
-wait
+build_spack_pkgs
 
 # build/refresh the lmod module tree
 my_spack_refresh_lmod -y
