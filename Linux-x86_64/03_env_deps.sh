@@ -307,14 +307,14 @@ cat hpc-apps-versions.cfg
 
 source hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.cfg!!"; exit 1; }
 
-SPKGS=( 'hdf5~mpi')
-SPGGS+=( 'highfive~mpi ^hdf5~mpi')
+SPKGS=('hdf5~mpi')
+SPGGS+=('highfive~mpi ^hdf5~mpi')
 SPKGS+=('netcdf~mpi ^hdf5~mpi')
 SPKGS+=("${BOOST}")
 #SPKGS+=("${BOOST183}")
 
-PPKGS=( 'hdf5+mpi' )
-PPKGS+=( 'netcdf+mpi ^hdf5+mpi' 'mpl' ) #'hpl' 'osu-micro-benchmarks' )
+PPKGS=('hdf5+mpi')
+PPKGS+=('netcdf+mpi' 'mpl') #'hpl' 'osu-micro-benchmarks' )
 comp_spkg_ppkg_loop
 
 # Weed out all the duplicates
@@ -342,12 +342,12 @@ spack clean -s
 # run a number of installs in the background
 build_spack_pkgs
 
-# build/refresh the lmod module tree.  Occasionaly (v.0.22.1?) the MPIs somehow erroneoulsy
-# became implicit along the way, and no module files were generated.  So explicitly mark then last,
-# just in case.
-for mpi in "${MPIS[@]}"; do
-    spack mark --all --explicit ${mpi}
-done
+# # build/refresh the lmod module tree.  Occasionaly (v.0.22.1?) the MPIs somehow erroneoulsy
+# # became implicit along the way, and no module files were generated.  So explicitly mark then last,
+# # just in case.
+# for mpi in "${MPIS[@]}"; do
+#     spack mark --all --explicit ${mpi}
+# done
 my_spack_refresh_lmod -y
 
 
