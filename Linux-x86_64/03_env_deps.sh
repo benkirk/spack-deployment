@@ -283,12 +283,12 @@ NVHPCS=( 'nvhpc@=24.3' )
 MPTS=( 'mpt@=2.26' )
 
 unset MPIS COMPS SPKGS PPKGS
-MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}") # "\${INTELMPIS[@]}" )
+MPIS=("\${MPICHS[@]}" "\${OPENMPIS[@]}" "\${INTELMPIS[@]}" )
 COMPS=("\${GCCS[@]}" "\${ONEAPIS[@]}" "\${INTELS[@]}") #"\${NVHPCS[@]}")
 
 # library versions perhaps useful to pin within apps later
-BOOST183='boost@=1.83.0' #+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
-BOOST='boost' #+atomic+chrono+date_time+filesystem+graph+json+log+math~mpi+multithreaded+program_options~python+random+regex+serialization+shared+signals+stacktrace+system+timer cxxstd=11'
+BOOST183='boost@=1.83.0'
+BOOST='boost'
 HDF5='hdf5+mpi+fortran+cxx+szip+hl'
 #---------------------------------------
 
@@ -302,11 +302,11 @@ source hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.c
 SPKGS=('hdf5~mpi')
 SPGGS+=('highfive~mpi ^hdf5~mpi')
 SPKGS+=('netcdf~mpi ^hdf5~mpi')
-SPKGS+=("${BOOST}")
+SPKGS+=('boost')
 #SPKGS+=("${BOOST183}")
 
 PPKGS=('hdf5+mpi')
-#PPKGS+=('netcdf+mpi' 'mpl') #'hpl' 'osu-micro-benchmarks' )
+PPKGS+=('netcdf+mpi' 'mpl') #'hpl' 'osu-micro-benchmarks' )
 comp_spkg_ppkg_loop
 
 # Weed out all the duplicates
