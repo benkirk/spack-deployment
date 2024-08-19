@@ -6,7 +6,7 @@ app_name="$( basename "${BASH_SOURCE[0]}" .sh)"
 
 # common configuration for building apps
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/common.cfg ] && . ${SCRIPTDIR}/common.cfg "${@}" || \
+[ -f ${SCRIPTDIR}/common.cfg ] && source ${SCRIPTDIR}/common.cfg "${@}" || \
     { echo "cannot locate ${SCRIPTDIR}/common.cfg}"; exit 1; }
 
 parse_args "${@}"
@@ -28,12 +28,24 @@ activate_spack_env || exit 1
 unset SPKGS
 
 COMPS=("${GCCS[@]}" "${ONEAPIS[@]}")
-PPKGS=('petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
-comp_spkg_ppkg_loop
+for comp in "${COMPS[@]}"; do
+    for mpi in "${MPIS[@]}"; do
+        ${echo_cmd} \
+            spack add petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist%${comp} \
+               ^intel-oneapi-mkl%${comp} \
+               ^${mpi}%${comp}
+    done
+done
 
 COMPS=("${GCCS[@]}")
-PPKGS=('petsc@3.16+hypre~hdf5~metis+mpi+openmp+shared~suite-sparse~superlu-dist ^intel-oneapi-mkl')
-comp_spkg_ppkg_loop
+for comp in "${COMPS[@]}"; do
+    for mpi in "${MPIS[@]}"; do
+        ${echo_cmd} \
+            spack add petsc@3.16+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist%${comp} \
+               ^intel-oneapi-mkl%${comp} \
+               ^${mpi}%${comp}
+    done
+done
 
 # --- END app-specific stuff
 #----------------------------------------------------------------------------
@@ -43,16 +55,6 @@ comp_spkg_ppkg_loop
 
 #----------------------------------------------------------------------------
 # --- BEGIN typical common build & finalization
-${echo_cmd} spack concretize --fresh || exit 1
-
-# populate our source cache mirror with any new packages introduced by these specs
-${echo_cmd} spack mirror create --directory ${spack_source_cache} --all
-
 ${dryrun} || build_spack_apps
-
-# build/refresh the lmod module tree
-# (note that any app-specific module or projection customization in spack.yaml
-# must go in step-03 of the build bootstrap process, unfortunately.)
-${dryrun} || my_spack_refresh_lmod -y
 # --- END typical common build & finalization
 #----------------------------------------------------------------------------

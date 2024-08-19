@@ -6,7 +6,7 @@ app_name="$( basename "${BASH_SOURCE[0]}" .sh)"
 
 # common configuration for building apps
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/common.cfg ] && . ${SCRIPTDIR}/common.cfg "${@}" || \
+[ -f ${SCRIPTDIR}/common.cfg ] && source ${SCRIPTDIR}/common.cfg "${@}" || \
     { echo "cannot locate ${SCRIPTDIR}/common.cfg}"; exit 1; }
 
 parse_args "${@}"
@@ -34,20 +34,8 @@ comp_spkg_ppkg_loop
 
 
 
-
 #----------------------------------------------------------------------------
 # --- BEGIN typical common build & finalization
-${echo_cmd} spack concretize --fresh || exit 1
-${concretize_only} && exit 0
-
-# populate our source cache mirror with any new packages introduced by these specs
-${echo_cmd} spack mirror create --directory ${spack_source_cache} --all
-
 ${dryrun} || build_spack_apps
-
-# build/refresh the lmod module tree
-# (note that any app-specific module or projection customization in spack.yaml
-# must go in step-03 of the build bootstrap process, unfortunately.)
-${dryrun} || my_spack_refresh_lmod -y
 # --- END typical common build & finalization
 #----------------------------------------------------------------------------
