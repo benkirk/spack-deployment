@@ -20,8 +20,8 @@ spack:
     install_tree:
       root: ${spack_pkg_install_path}
       projections:
-          all: '{name}/{version}-{hash:7}-{compiler.name}-{compiler.version}'
-          ^mpi: '{name}/{version}-{hash:7}-{^mpi.name}-{^mpi.version}-{compiler.name}-{compiler.version}'
+          all: 'hpc-apps/{name}/{version}-{hash:7}-{compiler.name}-{compiler.version}'
+          ^mpi: 'hpc-apps/{name}/{version}-{hash:7}-{^mpi.name}-{^mpi.version}-{compiler.name}-{compiler.version}'
 
   concretizer:
     unify: false
@@ -248,21 +248,81 @@ cat >>${spack_yaml} <<EOF
     - lmod%${spack_core_compiler}
 EOF
 
+
+
+# function to loop over outer prodcut of (compiler)x(mpis)
+comp_mpis_loop() {
+
+    for comp in "${COMPS[@]}"; do
+        for mpi in "${MPIS[@]}"; do
+            echo "    - ${mpi}%${comp}" >> ${spack_yaml}.tmp
+        done
+    done
+}
+
+
+
 # function to loop over outer prodcut of (compiler)x(serial packages) & (compiler)x(mpis)x(parallel packages)
 comp_spkg_ppkg_loop() {
 
     for comp in "${COMPS[@]}"; do
         for spkg in "${SPKGS[@]}"; do
-            echo "    - ${spkg} %${comp}" >> ${spack_yaml}.tmp
+            spack add ${spkg} %${comp}
         done
         for mpi in "${MPIS[@]}"; do
-            echo "    - ${mpi}%${comp}" >> ${spack_yaml}.tmp
+
+            # make sure we have the requested MPI - otherwise abort.
+            # (prevents us from accidientally installing MPIs we might not want)
+            mpi_desc="$(spack find --format="{name}@={version}%{compiler} {hash}" ${mpi}%${comp})" \
+                || { echo "Cannot locate requested MPI: ${mpi}%${comp}"; exit 1; }
+
+            mpi_spec="$(echo ${mpi_desc} | awk '{print $1}')"
+            mpi_hash="$(echo ${mpi_desc} | awk '{print $2}')"
+
+            spack mark --explicit "/${mpi_hash}"
+
             for ppkg in "${PPKGS[@]}"; do
-                echo "    - ${ppkg} %${comp} ^${mpi}%${comp}" >> ${spack_yaml}.tmp
+                spack add ${ppkg} %${comp} ^/${mpi_hash}
             done
         done
     done
+
+#     for comp in "${COMPS[@]}"; do
+#         for spkg in "${SPKGS[@]}"; do
+#             echo "    - ${spkg} %${comp}" >> ${spack_yaml}.tmp
+#         done
+#         for mpi in "${MPIS[@]}"; do
+#             # echo "    - ${mpi}%${comp}" >> ${spack_yaml}.tmp
+#             for ppkg in "${PPKGS[@]}"; do
+#                 echo "    - ${ppkg} %${comp} ^${mpi}%${comp}" >> ${spack_yaml}.tmp
+#             done
+#         done
+#     done
 }
+
+
+# build/refresh the lmod module tree.
+# Occasionaly (v.0.22.1?) the MPIs somehow erroneoulsy
+# became implicit along the way, and no module files were generated.
+mark_mpis_explicit()
+{
+    for comp in "${COMPS[@]}"; do
+        for mpi in "${MPIS[@]}"; do
+
+            # make sure we have the requested MPI - otherwise abort.
+            # (prevents us from accidientally installing MPIs we might not want)
+            mpi_desc="$(spack find --format="{name}@={version}%{compiler} {hash}" ${mpi}%${comp})" \
+                || { echo "Cannot locate requested MPI: ${mpi}%${comp}"; exit 1; }
+
+            mpi_spec="$(echo ${mpi_desc} | awk '{print $1}')"
+            mpi_hash="$(echo ${mpi_desc} | awk '{print $2}')"
+
+            echo " --> specifically marking explicit: ${mpi_desc}"
+            spack mark --explicit "/${mpi_hash}"
+        done
+    done
+}
+
 
 rm -f ${spack_yaml}.tmp
 
@@ -294,27 +354,18 @@ HDF5='hdf5+mpi+fortran+cxx+szip+hl'
 
 EOF
 
-pwd
 cat hpc-apps-versions.cfg
 
 source hpc-apps-versions.cfg || { echo "ERROR: cannot source hpc-apps-versions.cfg!!"; exit 1; }
 
-SPKGS=('hdf5~mpi')
-SPGGS+=('highfive~mpi ^hdf5~mpi')
-SPKGS+=('netcdf~mpi ^hdf5~mpi')
-SPKGS+=('boost')
-#SPKGS+=("${BOOST183}")
-
-PPKGS=('hdf5+mpi')
-PPKGS+=('netcdf+mpi' 'mpl') #'hpl' 'osu-micro-benchmarks' )
-comp_spkg_ppkg_loop
-
-# Weed out all the duplicates
+#--------------------------------------------------------------------------------
+# phase 1 - install initial envrionment
+#           including MPIs listed as specs
+#--------------------------------------------------------------------------------
+comp_mpis_loop
 cat ${spack_yaml}.tmp | sort | uniq >> ${spack_yaml} && rm -f ${spack_yaml}.tmp
-
 # debug the yaml file
-cat ${spack_yaml} #&& exit 0
-
+# cat ${spack_yaml} #&& exit 0
 spack env remove -y ${spack_env} 2>/dev/null
 spack mark --all --implicit
 spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
@@ -333,11 +384,52 @@ spack clean -s
 
 # run a number of installs in the background
 build_spack_pkgs
+#--------------------------------------------------------------------------------
 
-# # build/refresh the lmod module tree.  Occasionaly (v.0.22.1?) the MPIs somehow erroneoulsy
-# # became implicit along the way, and no module files were generated.  So explicitly mark then last,
-# # just in case.
-# for mpi in "${MPIS[@]}"; do
-#     spack mark --all --explicit ${mpi}
-# done
+
+
+#--------------------------------------------------------------------------------
+# phase 2 - with the previously installed MPIs now fixed,
+#           install additional libraries
+#--------------------------------------------------------------------------------
+SPKGS=('hdf5~mpi')
+SPGGS+=('highfive~mpi ^hdf5~mpi')
+SPKGS+=('netcdf~mpi ^hdf5~mpi')
+SPKGS+=('boost')
+
+PPKGS=('hdf5+mpi')
+PPKGS+=('netcdf+mpi' 'mpl') #'hpl' 'osu-micro-benchmarks' )
+comp_spkg_ppkg_loop
+
+spack concretize --fresh \
+    || exit 1
+
+# populate our source cache mirror
+spack mirror create --directory ${spack_source_cache} --all
+
+# clean any cruft from last step before moving on, to not fill our build stage
+spack clean -s
+
+# run a number of installs in the background
+build_spack_pkgs
+#--------------------------------------------------------------------------------
+
+
+
+#--------------------------------------------------------------------------------
+# make sure our desired MPIs are listed as explicit packages so we get modules.
+# (I've seen them 'disappear' - particularly when iterating on this and later scripts)
+mark_mpis_explicit
+
 my_spack_refresh_lmod -y
+#--------------------------------------------------------------------------------
+
+
+# Reference:
+# [Rocky8-Testbed-hpc-apps]$ spack uninstall --all --dependents +mpi
+# [Rocky8-Testbed-hpc-apps]$ spack uninstall --all --dependents openmpi mpich intel-oneapi-mpi
+# [Rocky8-Testbed-hpc-apps]$ spack uninstall --all --dependents %gcc@11.4.0
+# [Rocky8-Testbed-hpc-apps]$ spack uninstall --all --dependents %gcc@13.2.0
+# [Rocky8-Testbed-hpc-apps]$ spack uninstall --all --dependents %intel
+# [Rocky8-Testbed-hpc-apps]$ spack uninstall --all --dependents %oneapi
+# [Rocky8-Testbed-hpc-apps]$ spack gc

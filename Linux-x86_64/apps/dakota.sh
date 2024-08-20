@@ -22,13 +22,21 @@ activate_spack_env || exit 1
 #----------------------------------------------------------------------------
 # --- BEGIN app-specific stuff
 
+# Dakota needs an older version of boost, not properly reflected in its package.py file.
+# we could update the package.py, but that's one more thing to maintain. So do it here
+# instead.
+
+${echo_cmd} spack config remove 'packages:dakota'
+${echo_cmd} spack config add 'packages:dakota:require:["^boost@1.83.0"]'
+# (could show again for debugging): show_spack_configs
+
 # SPKGS is a bash array of serial packages to be built (unset if none).
 # PPKGS is a bash array of parallel (mpi-based) packages to be built (unset if none).
 # COMPS is a bash array of compilers to use.
-unset SPKGS
-
 # Dakota & gcc@13 dont mix
+
 COMPS=('gcc@=11.4.0' 'gcc@=12.3.0')
+SPKGS=('boost@=1.83.0')
 PPKGS=('dakota@=6.18')
 comp_spkg_ppkg_loop
 
