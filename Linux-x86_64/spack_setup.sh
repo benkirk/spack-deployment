@@ -156,6 +156,8 @@ EOF
 # and finishes with an update to the index
 my_spack_update_buildcache()
 {
+    mkdir -p ${spack_build_cache}
+
     set +m # turn off job control to prevent flood of "Done..." messages from background processes
 
     # create
@@ -166,7 +168,8 @@ my_spack_update_buildcache()
 
         # 'parallelize' this process by launching up to n_concurrent buildcache jobs in the background
         echo -n "${desc}, build cache jobid/pid=" ; \
-            spack buildcache create --allow-root --directory=${spack_build_cache} --only=package --unsigned "/${pkg_hash}" >/dev/null 2>&1 &
+            spack buildcache create \
+                  --only=package --unsigned ${spack_build_cache} "/${pkg_hash}" >/dev/null &
 
         # see how many jobs we have launched, block & wait when equal to n_concurrent
         while true; do
@@ -181,7 +184,7 @@ my_spack_update_buildcache()
 
     # index the updated buildcache
     echo "updating buildcache index..."
-    spack buildcache update-index --mirror-url=${spack_build_cache}
+    spack buildcache update-index ${spack_build_cache}
 }
 
 
@@ -189,7 +192,7 @@ my_spack_update_buildcache()
 # shell function to list spack configs, intended to be used inside an activated environment
 show_spack_configs()
 {
-    for arg in repos mirrors concretizer packages config modules compilers; do
+    for arg in repos mirrors concretizer config modules packages compilers; do
         spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
     done
 }
