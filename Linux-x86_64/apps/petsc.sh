@@ -28,24 +28,12 @@ activate_spack_env || exit 1
 unset SPKGS
 
 COMPS=("${GCCS[@]}" "${ONEAPIS[@]}")
-for comp in "${COMPS[@]}"; do
-    for mpi in "${MPIS[@]}"; do
-        ${echo_cmd} \
-            spack add petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist%${comp} \
-               ^intel-oneapi-mkl%${comp} \
-               ^${mpi}%${comp}
-    done
-done
+PPKGS=("petsc@3.17+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist")
+comp_spkg_ppkg_loop
 
 COMPS=("${GCCS[@]}")
-for comp in "${COMPS[@]}"; do
-    for mpi in "${MPIS[@]}"; do
-        ${echo_cmd} \
-            spack add petsc@3.16+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist%${comp} \
-               ^intel-oneapi-mkl%${comp} \
-               ^${mpi}%${comp}
-    done
-done
+PPKGS=("petsc@3.16+hypre~hdf5~metis+mpi+openmp+scalapack+shared~suite-sparse~superlu-dist")
+comp_spkg_ppkg_loop
 
 # --- END app-specific stuff
 #----------------------------------------------------------------------------
