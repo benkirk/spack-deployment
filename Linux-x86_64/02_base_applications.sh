@@ -10,8 +10,6 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 spack_env="${spack_deployment}-base"
 spack_yaml="spack-${spack_env}.yaml"
 
-echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
-
 cat >${spack_yaml} <<EOF
 spack:
   config:
@@ -248,11 +246,8 @@ spack:
     - zstd
 EOF
 
-spack env remove -y ${spack_env} 2>/dev/null
-spack mark --all --implicit
-spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
-spack env activate ${spack_env}
-#spack external find --not-buildable openssl ncurses #perl
+activate_env
+#spack mark --all --implicit
 show_spack_configs
 spack compilers
 

@@ -1,20 +1,79 @@
 #!/usr/bin/env bash
 
 # process command line arguments to get a specific system config, if desired
-spack_system_cfg="default.cfg"
+parse_args() {
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -rc|--system-config)
-            spack_system_cfg=$2
-            shift
-            ;;
+    origArgs="${@}"
 
-        *)
-            ;;
-    esac
-    shift
-done
+    usage()
+    {
+        cat <<EOF
+usage: ${0} ...args...
+
+where args are:
+       <-h|--help>            : display this help message
+       <-d|--delete-env>      : delete the environment, recreate & activate
+       <-c|--concretize-only> : concretize only, do not install
+       <-n|--dry-run>         : echo only, do not execute
+       <--no-mirrror>         : do not update source mirror with source code packages
+       <-rc|--system-config>  : alternate system configuration file (default: default.cfg)
+EOF
+    }
+
+
+    export delete_env=false
+    export dryrun=false
+    export update_source_mirror=true
+    export concretize_only=false
+    export echo_cmd=""
+    export spack_system_cfg="default.cfg"
+
+    while [ ${#} -gt 0 ] ; do
+        case ${1} in
+
+            "-h"|"--help")
+                usage
+                exit 1
+                ;;
+
+            "-d"|"--delete-env")
+                export delete_env=true
+                ;;
+
+            "-n"|"--dry-run")
+                export dryrun=true
+                export echo_cmd="echo"
+                echo " --> DRY-RUN ONLY!"
+                ;;
+
+            "--no-mirror")
+                export update_source_mirror=false
+                echo " --> NOT UPDATING SOURCE MIRROR"
+                ;;
+
+            "-c"|"--concretize-only")
+                echo " --> CONCRETIZE ONLY (no build)"
+                export concretize_only=true
+                ;;
+
+            "-rc"|"--system-config")
+                export spack_system_cfg=${2}
+                shift
+                ;;
+
+            *)
+                echo "unrecognized argument: ${1}"
+                echo "  file or directory name expected!!"
+                usage
+                exit 1
+        esac
+        shift # past argument
+    done
+}
+
+parse_args "${@}"
+
+
 
 #----------------------------------------------------------------------------
 # environment
@@ -192,11 +251,30 @@ my_spack_update_buildcache()
 # shell function to list spack configs, intended to be used inside an activated environment
 show_spack_configs()
 {
-    for arg in repos mirrors concretizer config modules packages compilers; do
+    for arg in repos mirrors concretizer config modules view packages compilers; do
         spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
     done
 }
 
+
+
+# shell function to activate a spack environment
+activate_env() {
+
+    # delete existing env, if requested
+    ${delete_env} && spack env remove -y ${spack_env} 2>/dev/null
+
+    # activate (if exists) and exit
+    spack env activate ${spack_env} 2>/dev/null \
+        && echo "Activated existing environment ${spack_env}" \
+        && return
+
+    # if we get here, the requested environment never existed
+    # or was just deleted.
+    echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
+    spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
+    spack env activate ${spack_env} || exit 1
+}
 
 
 # navigate to our clone directory and set up the spack environment

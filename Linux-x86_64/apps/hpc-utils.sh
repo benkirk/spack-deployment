@@ -9,11 +9,9 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 [ -f ${SCRIPTDIR}/common.cfg ] && source ${SCRIPTDIR}/common.cfg "${@}" || \
     { echo "cannot locate ${SCRIPTDIR}/common.cfg}"; exit 1; }
 
-parse_args "${@}"
-
-# Activate the "${spack_deployment}-hpc-apps" spack environment, query its configuration,
+# Activate the "${spack_deployment}-${app_name}" spack environment, query its configuration,
 # and prepare to add specs for this app
-activate_spack_env || exit 1
+create_and_activate_spack_env || exit 1
 # --- END typical common intialization
 #----------------------------------------------------------------------------
 
@@ -26,7 +24,8 @@ activate_spack_env || exit 1
 # PPKGS is a bash array of parallel (mpi-based) packages to be built (unset if none).
 # COMPS is a bash array of compilers to use.
 unset SPKGS
-PPKGS=('hpl' 'osu-micro-benchmarks')
+COMPS=("${GCCS[@]}")
+PPKGS=('mpifileutils~gpfs~lustre+xattr')
 comp_spkg_ppkg_loop
 
 # --- END app-specific stuff

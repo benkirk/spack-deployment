@@ -6,14 +6,12 @@ app_name="$( basename "${BASH_SOURCE[0]}" .sh)"
 
 # common configuration for building apps
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-[ -f ${SCRIPTDIR}/common.cfg ] && . ${SCRIPTDIR}/common.cfg "${@}" || \
+[ -f ${SCRIPTDIR}/common.cfg ] && source ${SCRIPTDIR}/common.cfg "${@}" || \
     { echo "cannot locate ${SCRIPTDIR}/common.cfg}"; exit 1; }
 
-parse_args "${@}"
-
-# Activate the "${spack_deployment}-hpc-apps" spack environment, query its configuration,
+# Activate the "${spack_deployment}-${app_name}" spack environment, query its configuration,
 # and prepare to add specs for this app
-activate_spack_env || exit 1
+create_and_activate_spack_env || exit 1
 # --- END typical common intialization
 #----------------------------------------------------------------------------
 
@@ -26,10 +24,10 @@ activate_spack_env || exit 1
 # PPKGS is a bash array of parallel (mpi-based) packages to be built (unset if none).
 # COMPS is a bash array of compilers to use.
 unset PPKGS
-
+unset MPIS
 # serial VTK, with system gcc
 COMPS=(${spack_system_compiler})
-SPKGS=('vtk@8.2.1a~ffmpeg~mpi+qt+python')
+SPKGS=('vtk@=8.2.1a~ffmpeg~mpi+qt+python')
 comp_spkg_ppkg_loop
 
 # --- END app-specific stuff
@@ -40,16 +38,6 @@ comp_spkg_ppkg_loop
 
 #----------------------------------------------------------------------------
 # --- BEGIN typical common build & finalization
-${echo_cmd} spack concretize --fresh || exit 1
-
-# populate our source cache mirror with any new packages introduced by these specs
-${echo_cmd} spack mirror create --directory ${spack_source_cache} --all
-
 ${dryrun} || build_spack_apps
-
-# build/refresh the lmod module tree
-# (note that any app-specific module or projection customization in spack.yaml
-# must go in step-03 of the build bootstrap process, unfortunately.)
-${dryrun} || my_spack_refresh_lmod -y
 # --- END typical common build & finalization
 #----------------------------------------------------------------------------

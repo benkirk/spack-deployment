@@ -9,11 +9,9 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 [ -f ${SCRIPTDIR}/common.cfg ] && source ${SCRIPTDIR}/common.cfg "${@}" || \
     { echo "cannot locate ${SCRIPTDIR}/common.cfg}"; exit 1; }
 
-parse_args "${@}"
-
-# Activate the "${spack_deployment}-hpc-apps" spack environment, query its configuration,
+# Activate the "${spack_deployment}-${app_name}" spack environment, query its configuration,
 # and prepare to add specs for this app
-activate_spack_env || exit 1
+create_and_activate_spack_env || exit 1
 # --- END typical common intialization
 #----------------------------------------------------------------------------
 

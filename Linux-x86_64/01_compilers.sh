@@ -11,8 +11,6 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 spack_env="${spack_deployment}-compilers"
 spack_yaml="spack-${spack_env}.yaml"
 
-echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
-
 cat >${spack_yaml} <<EOF
 spack:
   config:
@@ -120,16 +118,19 @@ spack:
     - gcc@4
 EOF
 
-spack env remove -y ${spack_env} 2>/dev/null
-spack mark --all --implicit
-spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
-spack env activate ${spack_env}
-#spack external find --not-buildable openssl ncurses #perl
+
+activate_env
+#spack mark --all --implicit
 spack compiler find && spack compilers
 show_spack_configs
-
-spack concretize --fresh \
-    || exit 1
+cat <<EOF
+--------------------------------------------------------------------------------
+${spack_env} - phase 1 - installing
+   ${spack_core_compiler}
+   and other gccs using ${spack_system_compiler}
+--------------------------------------------------------------------------------
+EOF
+spack concretize --fresh || exit 1
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all
@@ -144,15 +145,20 @@ spack load ${spack_core_compiler} && spack compiler add && spack unload --all &&
  	|| exit 1
 
 # build llvm, download aocc, intel, and nvhpc compilers
+cat <<EOF
+--------------------------------------------------------------------------------
+${spack_env} - phase 2 - installing additional compilers
+--------------------------------------------------------------------------------
+EOF
 spack add \
       intel-oneapi-compilers@=2023.2.4 %${spack_core_compiler} \
       intel-oneapi-compilers-classic@=2021.10.0 %${spack_core_compiler} \
       nvhpc@24 %${spack_core_compiler} \
-      cuda@12 %${spack_core_compiler} \
-    && spack concretize --fresh \
-    || exit 1
+      cuda@12 %${spack_core_compiler}
 
 #      llvm@17+flang %${spack_core_compiler} \
+
+spack concretize --fresh || exit 1
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all
