@@ -88,7 +88,7 @@ rm -f ~/.spack/*.yaml
 cat > ~/.spack/packages.yaml <<EOF
 packages:
   all:
-    target: [x86_64]
+    target: [x86_64_2]
 EOF
 
 cat > ~/.spack/concretizer.yaml <<EOF
