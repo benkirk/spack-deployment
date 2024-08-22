@@ -10,7 +10,10 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 spack_env="${spack_deployment}-base"
 spack_yaml="spack-${spack_env}.yaml"
 
-cat >${spack_yaml} <<EOF
+# when we initialize this environment from scratch:
+custom_env_yaml_initialization() {
+
+    cat >${spack_yaml} <<EOF
 spack:
   config:
     build_stage: ${spack_build_stage_path}
@@ -245,6 +248,7 @@ spack:
     - zsh
     - zstd
 EOF
+}  # < -- end custom_env_yaml_initialization()
 
 activate_env
 #spack mark --all --implicit

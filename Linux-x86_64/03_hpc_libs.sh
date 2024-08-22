@@ -10,7 +10,10 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 spack_env="${spack_deployment}-hpc-libs"
 spack_yaml="spack-${spack_env}.yaml"
 
-cat >${spack_yaml} <<EOF
+# when we initialize this environment from scratch:
+custom_env_yaml_initialization() {
+
+    cat >${spack_yaml} <<EOF
 spack:
 
   config:
@@ -232,19 +235,22 @@ spack:
 EOF
 
 
-my_build_required_pkgs \
-    "${spack_deployment}-base" \
-    cmake autoconf libtool automake openssh perl findutils diffutils m4 curl tar pkgconf util-macros libszip \
-    gmake gettext numactl libxml2 zlib zlib-ng zstd xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
-    openssl libevent texinfo autoconf-archive libtirpc tcsh \
-    libfabric ucx python \
-    slurm \
-    && echo "Fixed Externals:" && cat fixed_packages.yaml | tee -a ${spack_yaml}
+    # packages we don't want to rebuild -
+    # so instead we take them as fixed from a previous environment
+    my_build_required_pkgs \
+        "${spack_deployment}-base" \
+        cmake autoconf libtool automake openssh perl findutils diffutils m4 curl tar pkgconf util-macros libszip \
+        gmake gettext numactl libxml2 zlib zlib-ng zstd xz ncurses tcl readline bzip2 gdbm util-linux-uuid sqlite intel-oneapi-mkl \
+        openssl libevent texinfo autoconf-archive libtirpc tcsh \
+        libfabric ucx python \
+        slurm \
+        && echo "Fixed Externals:" && cat fixed_packages.yaml | tee -a ${spack_yaml}
 
-cat >>${spack_yaml} <<EOF
+    cat >>${spack_yaml} <<EOF
   specs:
     - lmod%${spack_core_compiler}
 EOF
+}  # < -- end custom_env_yaml_initialization()
 
 
 
@@ -258,33 +264,6 @@ comp_mpis_loop() {
     done
 }
 
-
-
-# function to loop over outer prodcut of (compiler)x(serial packages) & (compiler)x(mpis)x(parallel packages)
-comp_spkg_ppkg_loop() {
-
-    for comp in "${COMPS[@]}"; do
-        for spkg in "${SPKGS[@]}"; do
-            spack add ${spkg} %${comp}
-        done
-        for mpi in "${MPIS[@]}"; do
-
-            # make sure we have the requested MPI - otherwise abort.
-            # (prevents us from accidientally installing MPIs we might not want)
-            mpi_desc="$(spack find --format="{name}@={version}%{compiler} {hash}" ${mpi}%${comp})" \
-                || { echo "Cannot locate requested MPI: ${mpi}%${comp}"; exit 1; }
-
-            mpi_spec="$(echo ${mpi_desc} | awk '{print $1}')"
-            mpi_hash="$(echo ${mpi_desc} | awk '{print $2}')"
-
-            spack mark --explicit "/${mpi_hash}"
-
-            for ppkg in "${PPKGS[@]}"; do
-                spack add ${ppkg} %${comp} ^/${mpi_hash}
-            done
-        done
-    done
-}
 
 
 # build/refresh the lmod module tree.
@@ -347,11 +326,11 @@ activate_env
 show_spack_configs
 spack compilers
 cat <<EOF
---------------------------------------------------------------------------------
-${spack_env} - phase 1 - installing
-   MPIS=( ${MPIS[@]} )
- x COMPS=( ${COMPS[@]} )
---------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------
+| ${spack_env} - phase 1 - installing
+|    MPIS=( ${MPIS[@]} )
+|  x COMPS=( ${COMPS[@]} )
+ -------------------------------------------------------------------------------
 EOF
 comp_mpis_loop
 spack concretize --fresh || exit 1
@@ -380,15 +359,15 @@ SPKGS+=('boost')
 PPKGS=('hdf5+mpi')
 PPKGS+=('mpl') # 'netcdf+mpi')
 cat <<EOF
---------------------------------------------------------------------------------
-${spack_env} - phase 2 - installing
-   COMPS=( ${COMPS[@]} )
- x SPGS=( ${SPKGS[@]} )
-
-   COMPS=( ${COMPS[@]} )
- x MPIS=( ${MPIS[@]} )
- x PPKGS=( ${PPKGS[@]} )
---------------------------------------------------------------------------------
+ -------------------------------------------------------------------------------
+| ${spack_env} - phase 2 - installing
+|    COMPS=( ${COMPS[@]} )
+|  x SPGS=( ${SPKGS[@]} )
+|
+|    COMPS=( ${COMPS[@]} )
+|  x MPIS=( ${MPIS[@]} )
+|  x PPKGS=( ${PPKGS[@]} )
+ -------------------------------------------------------------------------------
 EOF
 comp_spkg_ppkg_loop
 spack concretize --fresh || exit 1

@@ -5,8 +5,8 @@ parse_args() {
 
     origArgs="${@}"
 
-    usage()
-    {
+    usage() {
+
         cat <<EOF
 usage: ${0} ...args...
 
@@ -123,8 +123,8 @@ type module >/dev/null 2>&1 \
 
 # shell function to clean/refresh module tree,
 # passing along any additional arguments
-my_spack_refresh_lmod()
-{
+my_spack_refresh_lmod() {
+
     echo "Refreshing lmod modules at ${spack_lmod_root}"
 
     spack module lmod refresh $@ \
@@ -174,10 +174,62 @@ build_spack_pkgs() {
 
 
 
+# function to loop over outer prodcut of (compiler)x(spkgs)
+comp_spkgs_loop() {
+
+    for comp in "${COMPS[@]}"; do
+        for spkg in "${SPKGS[@]}"; do
+            ${echo_cmd} spack add ${spkg} %${comp}
+        done
+    done
+}
+
+
+
+# function to loop over outer prodcut of (compiler)x(mpis)x(parallel packages)
+comp_ppkg_loop() {
+
+    # we will look for MPIs in ${parent_env}
+    # which defaults to the same as ${spack_env} when not set
+    parent_env="${parent_env:-"${spack_env}"}"
+
+    for comp in "${COMPS[@]}"; do
+        for mpi in "${MPIS[@]}"; do
+            # make sure we have the requested MPI - otherwise abort.
+            # (prevents us from accidientally installing MPIs we might not want)
+            mpi_desc="$(spack env activate ${parent_env} && spack find --format="{name}@={version}%{compiler} {hash}" ${mpi}%${comp})" \
+                || { echo "Cannot locate requested MPI: ${mpi}%${comp}"; exit 1; }
+
+            mpi_spec="$(echo ${mpi_desc} | awk '{print $1}')"
+            mpi_hash="$(echo ${mpi_desc} | awk '{print $2}')"
+
+            echo "For ${mpi_desc}:"
+
+            ${echo_cmd} spack mark --explicit "/${mpi_hash}"
+
+            for ppkg in "${PPKGS[@]}"; do
+                ${echo_cmd} spack add ${ppkg} %${comp} ^/${mpi_hash}
+            done
+        done
+    done
+}
+
+
+
+# function to loop over outer prodcut of both
+# (compiler)x(serial packages) & (compiler)x(mpis)x(parallel packages)
+comp_spkg_ppkg_loop() {
+
+    comp_spkgs_loop
+    comp_ppkg_loop
+}
+
+
+
 # shell function to take a list of previously installed packages and treat
 # them as fixed externals
-my_build_required_pkgs()
-{
+my_build_required_pkgs() {
+
     [ $# -ge 2 ] || { echo "usage: to my_build_required_pkgs <SPACK_SEARCH_ENVIRONMENT> pkg1 pkg2 ..."; exit 1; }
     local spack_search_env=$1 && shift
     spack env activate ${spack_search_env} || { echo "spacktivate ${spack_search_env} failed!!" ; exit 1; }
@@ -213,8 +265,7 @@ EOF
 # shell function to update our buildcache with any new packages
 # dispatched a number of simultaneous buildcache steps in parallel to speed thing up
 # and finishes with an update to the index
-my_spack_update_buildcache()
-{
+my_spack_update_buildcache() {
     mkdir -p ${spack_build_cache}
 
     set +m # turn off job control to prevent flood of "Done..." messages from background processes
@@ -249,8 +300,7 @@ my_spack_update_buildcache()
 
 
 # shell function to list spack configs, intended to be used inside an activated environment
-show_spack_configs()
-{
+show_spack_configs() {
     for arg in repos mirrors concretizer config modules view packages compilers; do
         spack config blame ${arg} && echo && echo # show our current configuration, with what comes from where
     done
@@ -258,10 +308,16 @@ show_spack_configs()
 
 
 
+custom_env_yaml_initialization() {
+    # no-op, can be redefined later as needed
+    return
+}
+
+
 # shell function to activate a spack environment
 activate_env() {
 
-    # delete existing env, if requested
+    # delete existing env, if requested (spack will issue a message if existed, so no need to...)
     ${delete_env} && spack env remove -y ${spack_env} 2>/dev/null
 
     # activate (if exists) and exit
@@ -271,6 +327,7 @@ activate_env() {
 
     # if we get here, the requested environment never existed
     # or was just deleted.
+    custom_env_yaml_initialization
     echo "Configuring ${spack_env} from ${spack_yaml} in $(pwd)"
     spack env create ${spack_env} ./${spack_yaml} || { cat ./${spack_yaml}; exit 1; }
     spack env activate ${spack_env} || exit 1
