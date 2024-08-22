@@ -35,8 +35,14 @@ ${echo_cmd} spack config add 'packages:dakota:require:["^boost@1.83.0"]'
 
 COMPS=('gcc@=11.4.0' 'gcc@=12.3.0')
 SPKGS=('boost@=1.83.0')
+comp_spkgs_loop
+
+
 PPKGS=('dakota@=6.18')
-comp_spkg_ppkg_loop
+# override, dakota seems especially bad about interfering with itself
+# when compiling multiple versions simultaneously
+n_concurrent_installs=0
+comp_ppkg_loop
 
 # --- END app-specific stuff
 #----------------------------------------------------------------------------
