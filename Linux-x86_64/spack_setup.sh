@@ -17,6 +17,9 @@ where args are:
        <-n|--dry-run>         : echo only, do not execute
        <--no-mirrror>         : do not update source mirror with source code packages
        <-rc|--system-config>  : alternate system configuration file (default: default.cfg)
+       <--allow-binary>       : install packages from binary cache when available
+       <--no-binary>          : do not install packages from binary cache
+       <-j|--njobs>           : number of concurrent processes when parallelizing tasks
 EOF
     }
 
@@ -27,6 +30,8 @@ EOF
     export concretize_only=false
     export echo_cmd=""
     export spack_system_cfg="default.cfg"
+    export allow_binary_pkgs=true
+    export n_concurrent_installs=2
 
     while [ ${#} -gt 0 ] ; do
         case ${1} in
@@ -61,6 +66,20 @@ EOF
                 shift
                 ;;
 
+            "--allow-binary")
+                export allow_binary_pkgs=true
+                ;;
+
+            "--no-binary")
+                export allow_binary_pkgs=false
+                ;;
+
+            "-j"|"--njobs")
+                shift
+                export n_concurrent_installs=${1}
+                echo "setting n_concurrent_installs=${n_concurrent_installs} from the command line"
+                ;;
+
             *)
                 echo "unrecognized argument: ${1}"
                 echo "  file or directory name expected!!"
@@ -72,8 +91,6 @@ EOF
 }
 
 parse_args "${@}"
-
-
 
 #----------------------------------------------------------------------------
 # environment
@@ -159,17 +176,37 @@ cat ~/spack_modules_${spack_deployment}.sh
 # they have been added & concretized in an active environment
 build_spack_pkgs() {
 
-    # run a number of installs in the background
-    for bg_inst in $(seq 1 ${n_concurrent_installs}); do
-        # install (possibly from cache), if fails potentially try again ignoring cache
-        spack install ${spack_install_flags} \
-            || [ "x${spack_install_flags}" != "x${spack_install_flags_no_cache}" ] && spack install ${spack_install_flags_no_cache} &
-    done
+    spack_install_flags_no_cache="${spack_install_flags} --no-cache"
+    spack_install_flags_allow_cache="${spack_install_flags} --no-check-signature"
 
-    # run a single install in the foreground.  try with our build flags, which could use a binary cache,
-    # but fall back to a --no-cache attempt if necessary
-    spack install ${spack_install_flags} || spack install ${spack_install_flags_no_cache} || exit 1
-    wait
+    if [[ ${allow_binary_pkgs} == true ]]; then
+
+        # run a number of installs in the background
+        for bg_inst in $(seq 1 ${n_concurrent_installs}); do
+            # install (possibly from cache), if fails potentially try again ignoring cache
+            spack install ${spack_install_flags_allow_cache} || spack install ${spack_install_flags_no_cache} &
+        done
+        wait
+        # run a single install in the foreground.  try with our build flags, which could use a binary cache,
+        # but fall back to a --no-cache attempt if necessary
+        spack install ${spack_install_flags_allow_cache} || spack install ${spack_install_flags_no_cache} || exit 1
+
+
+
+    else
+
+        # run a number of installs in the background
+        for bg_inst in $(seq 1 ${n_concurrent_installs}); do
+            # install (possibly from cache), if fails potentially try again ignoring cache
+            spack install ${spack_install_flags_no_cache} &
+        done
+        wait
+        # run a single install in the foreground.  try with our build flags, which could use a binary cache,
+        # but fall back to a --no-cache attempt if necessary
+        spack install ${spack_install_flags_no_cache} || exit 1
+
+
+    fi
 }
 
 
@@ -275,14 +312,15 @@ my_spack_update_env_buildcache() {
     set +m # turn off job control to prevent flood of "Done..." messages from background processes
 
     # create
-    n_concurrent=8
+    n_concurrent=${n_concurrent_installs}
+
     while read pkg_hash; do
 
         desc=$(spack find -Lv --show-full-compiler "/${pkg_hash}" | grep "${pkg_hash}")
 
         # 'parallelize' this process by launching up to n_concurrent buildcache jobs in the background
         echo -n "${desc}, build cache jobid/pid=" ; \
-            spack buildcache create \
+            spack buildcache push \
                   --only=package --unsigned ${spack_build_cache} "/${pkg_hash}" >/dev/null &
 
         # see how many jobs we have launched, block & wait when equal to n_concurrent
