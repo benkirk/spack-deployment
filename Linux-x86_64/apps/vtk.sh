@@ -28,7 +28,7 @@ unset MPIS
 # serial VTK, with system gcc
 COMPS=(${spack_system_compiler})
 SPKGS=('vtk@=8.2.1a~ffmpeg~mpi+qt+python')
-comp_spkg_ppkg_loop
+comp_spkg_loop
 
 # --- END app-specific stuff
 #----------------------------------------------------------------------------
