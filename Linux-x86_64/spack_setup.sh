@@ -265,8 +265,12 @@ EOF
 # shell function to update our buildcache with any new packages
 # dispatched a number of simultaneous buildcache steps in parallel to speed thing up
 # and finishes with an update to the index
-my_spack_update_buildcache() {
+my_spack_update_env_buildcache() {
+
     mkdir -p ${spack_build_cache}
+
+    [ $# -le 1 ] || { echo "usage: my_spack_update_env_buildcache <(optional) ENV_NAME>"; exit 1; }
+    [ $# -eq 1 ] && { spack env activate ${1} || exit 1; }
 
     set +m # turn off job control to prevent flood of "Done..." messages from background processes
 
@@ -295,6 +299,20 @@ my_spack_update_buildcache() {
     # index the updated buildcache
     echo "updating buildcache index..."
     spack buildcache update-index ${spack_build_cache}
+}
+
+
+
+# update buildcache for all environments
+my_spack_update_buildcache_all_env(){
+
+    # deactivate first
+    spack env deactivate 2>/dev/null
+
+    for env in $(spack env list | grep -v default | sort | uniq); do
+        echo "Updating binary build cache for environment ${env}"
+        my_spack_update_env_buildcache "${env}" || exit 1
+    done
 }
 
 

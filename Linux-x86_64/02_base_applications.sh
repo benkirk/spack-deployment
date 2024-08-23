@@ -55,6 +55,7 @@ spack:
           - gcc@10
           - gcc@9
           - gcc@4
+          - perl  #  <-- can't say why, but even listing as explicit below fails to generate a module.  so force it.
         core_compilers:
           - ${spack_core_compiler}
         core_specs:
@@ -78,16 +79,6 @@ spack:
           environment:
             set:
               'JULIA_PKG_USE_CLI_GIT': '1'
-
-        # the tecplot module definition needs some help to find bin, and to set a sensible license file
-        tecplot:
-          environment:
-            set:
-              'TECHOME': '{prefix}'
-              'TEC360HOME': '{prefix}'
-              'teclmd_LICENSE': '27101@keys-fsl.jsc.nasa.gov'
-            prepend_path:
-              PATH: '{prefix}/360ex_{version}/bin'
 
         projections:
           all: '{name}/{version}'
@@ -143,6 +134,7 @@ spack:
     - autoconf@=2.69
     - autoconf@=2.71 # https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-2021-1-beta04-HPC-Toolkit-build-error-with-loopopt/m-p/1184181
     - automake@=1.16.5
+    - awscli
     - bash@5
     - bazel
     - bazel@=4.2.1 ^openjdk ^python@3.8
@@ -205,7 +197,8 @@ spack:
     - paraview+qt
     - pdf2svg
     - pdsh
-    - perl%${spack_core_compiler} # perl also gets built with older gcc via julia above, so fully specify so this makes it into the 'root' of our environment.
+    - perl
+    - perl-tk
     - pkgconf
     - podman@4
     - python@3.8 # <-- required for VTK@8.2.1a later
