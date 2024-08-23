@@ -30,7 +30,7 @@ EOF
     export concretize_only=false
     export echo_cmd=""
     export spack_system_cfg="default.cfg"
-    export allow_binary_pkgs=true
+    export allow_binary_pkgs=false
     export n_concurrent_installs=2
 
     while [ ${#} -gt 0 ] ; do
