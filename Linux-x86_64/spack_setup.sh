@@ -175,7 +175,7 @@ build_spack_pkgs() {
 
 
 # function to loop over outer prodcut of (compiler)x(spkgs)
-comp_spkgs_loop() {
+comp_spkg_loop() {
 
     for comp in "${COMPS[@]}"; do
         for spkg in "${SPKGS[@]}"; do
@@ -220,7 +220,7 @@ comp_ppkg_loop() {
 # (compiler)x(serial packages) & (compiler)x(mpis)x(parallel packages)
 comp_spkg_ppkg_loop() {
 
-    comp_spkgs_loop
+    comp_spkg_loop
     comp_ppkg_loop
 }
 
