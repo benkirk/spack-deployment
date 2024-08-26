@@ -393,8 +393,9 @@ activate_env() {
 # navigate to our clone directory and set up the spack environment
 cd ${spack_clone_path} && pwd && . share/spack/setup-env.sh || exit 1
 
-[ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add mysrcmirror ${spack_source_cache}
-[ -d ${spack_build_cache}                 ] && spack mirror add mybinmirror ${spack_build_cache}  && spack mirror list
+[ -d ${spack_source_cache}/_source-cache/ ] && spack mirror add --type source mysrcmirror ${spack_source_cache}
+[ -d ${spack_build_cache}                 ] && spack mirror add --type binary mybinmirror ${spack_build_cache}
+spack mirror list
 
 mkdir -p ${spack_build_path} && cd ${spack_build_path} && echo "pwd=$(pwd)" || exit 1
 echo "Finished initalization from ${SCRIPTDIR}/spack_setup.sh"
