@@ -56,6 +56,7 @@ spack:
           - gcc@9
           - gcc@4
           - perl  #  <-- can't say why, but even listing as explicit below fails to generate a module.  so force it.
+          - git   # " "
         core_compilers:
           - ${spack_core_compiler}
         core_specs:
@@ -183,7 +184,7 @@ spack:
     - matio
     - mercurial
     - meson
-    - miniforge3@=24.3.0-0-Linux-x86_64
+    - miniforge3@=24.7.1-2-Linux-x86_64
     #- mplayer
     - mutationpp
     - ncurses

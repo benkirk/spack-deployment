@@ -114,6 +114,7 @@ spack:
   specs:
     - lmod
     - ${spack_core_compiler}
+    - gcc@14
     - gcc@13
     - gcc@12
     - gcc@11

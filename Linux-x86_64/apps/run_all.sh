@@ -11,5 +11,6 @@ for app in *.sh; do
     [[ "${app}" == "$(basename ${0})" ]] && continue
 
     echo "Running ${app} ${@}"
-    #echo ./${app} "${@}"
+    [ -x ${app} ] && ./${app} "${@}"
+    
 done

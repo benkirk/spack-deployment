@@ -33,7 +33,7 @@ ${echo_cmd} spack config add 'packages:dakota:require:["^boost@1.83.0"]'
 # COMPS is a bash array of compilers to use.
 # Dakota & gcc@13 dont mix
 
-COMPS=('gcc@=11.4.0' 'gcc@=12.3.0')
+COMPS=('gcc@=11.5.0' 'gcc@=12.4.0')
 SPKGS=('boost@=1.83.0')
 comp_spkg_loop
 
