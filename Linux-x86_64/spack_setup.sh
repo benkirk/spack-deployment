@@ -30,7 +30,7 @@ EOF
     export concretize_only=false
     export echo_cmd=""
     export spack_system_cfg="default.cfg"
-    export allow_binary_pkgs=false
+    export allow_binary_pkgs=${allow_binary_pkgs:=true}
     export n_concurrent_installs=2
 
     while [ ${#} -gt 0 ] ; do
@@ -135,8 +135,15 @@ EOF
 type module >/dev/null 2>&1 \
     && module --force purge && module list \
     && module unuse ${MODULEPATH} \
-    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES module \
-    && env | grep MODU | sort
+    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME \
+             __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES \
+             LMOD_DIR LMOD_CMD LMOD_PKG LMOD_ROOT MODULEPATH_modshare module \
+             BASH_FUNC__module_raw BASH_FUNC_switchml BASH_FUNC_scl BASH_FUNC_ml \
+             LMOD_SETTARG_FULL_SUPPORT MODULES_RUN_QUARANTINE \
+             LMOD_SITE_MODULEPATH MODULES_CMD \
+    && unset -f $(compgen -A function) \
+    && unset $(compgen -v | egrep "LMOD|MODU|Modu") \
+    && env | egrep "LMOD|MODU|Modu" | sort
 
 # shell function to clean/refresh module tree,
 # passing along any additional arguments
@@ -144,31 +151,43 @@ my_spack_refresh_lmod() {
 
     echo "Refreshing lmod modules at ${spack_lmod_root}"
 
+    # Stoe the location of lmod
+    spack_lmod_location=$(spack env activate "${spack_deployment}-compilers" && spack location -i lmod)
+
     spack module lmod refresh $@ \
-        && . $(spack location -i lmod)/lmod/lmod/init/bash \
+        && . ${spack_lmod_location}/lmod/lmod/init/bash \
         && . ${spack_clone_path}/share/spack/setup-env.sh \
         && module unuse ${MODULEPATH} \
         && module use ${spack_lmod_root}/Core \
         && module avail
 
-cat > ~/spack_modules_${spack_deployment}.sh <<EOF
+cat > ${spack_lmod_root}/spack_modules_${spack_deployment}.sh <<EOF
 # To use this module stack do the following:
 
 # remove any existing module implementation fron the current shell, as much as possible
 type module >/dev/null 2>&1 \\
     && module --force purge \\
     && module unuse \${MODULEPATH} \\
-    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES module \
-    && env | grep MODU | sort
+    && unset MODULEPATH MODULEPATH_ROOT MODULESHOME \\
+             __LMOD_REF_COUNT_MODULEPATH LMOD_MODULERCFILE LMOD_SYSTEM_DEFAULT_MODULES \\
+             LMOD_DIR LMOD_CMD LMOD_PKG LMOD_ROOT MODULEPATH_modshare module \\
+             BASH_FUNC__module_raw BASH_FUNC_switchml BASH_FUNC_scl BASH_FUNC_ml \\
+             LMOD_SETTARG_FULL_SUPPORT MODULES_RUN_QUARANTINE \\
+             LMOD_SITE_MODULEPATH MODULES_CMD \\
+    && unset -f \$(compgen -A function) \\
+    && unset \$(compgen -v | egrep "LMOD|MODU|Modu") \\
+    && env | egrep "LMOD|MODU|Modu" | sort
 
 # use the spack-provided lmod & module tree.  spack defaults to TCL modules, so swap for Lmod.
-. $(spack location -i lmod)/lmod/lmod/init/bash \\
+. ${spack_lmod_location}/lmod/lmod/init/bash \\
     && . ${spack_clone_path}/share/spack/setup-env.sh \\
     && module unuse \${MODULEPATH} \\
     && module use ${spack_lmod_root}/Core \\
     && module avail
 EOF
-cat ~/spack_modules_${spack_deployment}.sh
+cat ${spack_lmod_root}/spack_modules_${spack_deployment}.sh
+ln -sf ${spack_lmod_root}/spack_modules_${spack_deployment}.sh ~/spack_modules_${spack_deployment}.sh
+
 }
 
 
@@ -316,10 +335,10 @@ my_spack_update_env_buildcache() {
 
     while read pkg_hash; do
 
-        desc=$(spack find -Lv --show-full-compiler "/${pkg_hash}" | grep "${pkg_hash}")
+        desc=$(spack find -Lv --show-full-compiler "/${pkg_hash}" | grep "${pkg_hash}" | tail -n 1)
 
         # 'parallelize' this process by launching up to n_concurrent buildcache jobs in the background
-        echo -n "${desc}, build cache jobid/pid=" ; \
+        echo "${desc}" ; \
             spack buildcache push \
                   --only=package --unsigned ${spack_build_cache} "/${pkg_hash}" >/dev/null &
 
@@ -348,7 +367,9 @@ my_spack_update_buildcache_all_env(){
     spack env deactivate 2>/dev/null
 
     for env in $(spack env list | grep -v default | sort | uniq); do
-        echo "Updating binary build cache for environment ${env}"
+        echo " ----------------------------------------------------------------------------"
+        echo "| Updating binary build cache for environment ${env}"
+        echo " ----------------------------------------------------------------------------"
         my_spack_update_env_buildcache "${env}" || exit 1
     done
 }

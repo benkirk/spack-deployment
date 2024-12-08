@@ -10,7 +10,8 @@ cd ${SCRIPTDIR} || exit 1
 for app in *.sh; do
     [[ "${app}" == "$(basename ${0})" ]] && continue
 
+    [[ -x "${app}" ]] || continue
+
     echo "Running ${app} ${@}"
-    [ -x ${app} ] && ./${app} "${@}"
-    
+    ./${app} "${@}"
 done

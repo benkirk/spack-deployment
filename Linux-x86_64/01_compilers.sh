@@ -69,7 +69,7 @@ spack:
         # https://spack.readthedocs.io/en/latest/module_file_support.html#select-default-modules
         defaults:
           - ${spack_core_compiler}
-          - intel-oneapi-compilers@2023.2.4
+          - intel-oneapi-compilers@2024.2.1
         all:
           autoload: direct
           environment:
@@ -154,12 +154,13 @@ cat <<EOF
  -------------------------------------------------------------------------------
 EOF
 spack add \
-      intel-oneapi-compilers@=2023.2.4 %${spack_core_compiler} \
+      intel-oneapi-compilers@=2024.2.1 %${spack_core_compiler} \
+      intel-oneapi-compilers@=2025.0.0 %${spack_core_compiler} \
       intel-oneapi-compilers-classic@=2021.10.0 %${spack_core_compiler} \
       nvhpc@24 %${spack_core_compiler} \
       cuda@12 %${spack_core_compiler}
 
-#      llvm@17+flang %${spack_core_compiler} \
+#      llvm@19+flang %${spack_core_compiler} \
 
 spack concretize --fresh || exit 1
 

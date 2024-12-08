@@ -24,6 +24,7 @@ create_and_activate_spack_env || exit 1
 # PPKGS is a bash array of parallel (mpi-based) packages to be built (unset if none).
 # COMPS is a bash array of compilers to use.
 unset SPKGS
+COMPS+=("${NVHPCS[@]}")
 PPKGS=('hpl' 'osu-micro-benchmarks')
 comp_spkg_ppkg_loop
 

@@ -56,7 +56,8 @@ spack:
           - gcc@9
           - gcc@4
           - perl  #  <-- can't say why, but even listing as explicit below fails to generate a module.  so force it.
-          - git   # " "
+          #- git   # " "
+          - esp   # " "
         core_compilers:
           - ${spack_core_compiler}
         core_specs:
@@ -135,7 +136,7 @@ spack:
     - autoconf@=2.69
     - autoconf@=2.71 # https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-2021-1-beta04-HPC-Toolkit-build-error-with-loopopt/m-p/1184181
     - automake@=1.16.5
-    - awscli
+    - awscli  # Added for #1359
     - bash@5
     - bazel
     - bazel@=4.2.1 ^openjdk ^python@3.8
@@ -164,7 +165,6 @@ spack:
     - gettext
     - ghostscript
     - git
-    - gimp ^gettext+libxml2 ^highway@=1.0.4 # highway@=1.0.7: Error: no such instruction: vmovw %xmm1,12(%r13) etc...
     - gmake
     #- gmsh+eigen+openmp cxxflags="-fpermissive"
     - gnuplot+X
@@ -184,8 +184,8 @@ spack:
     - matio
     - mercurial
     - meson
-    - miniforge3@=24.7.1-2-Linux-x86_64
-    #- mplayer
+    - miniforge3 #@=24.3.0-0-Linux-x86_64
+    - mplayer
     - mutationpp
     - ncurses
     - ninja
@@ -199,7 +199,7 @@ spack:
     - pdf2svg
     - pdsh
     - perl
-    - perl-tk
+    - perl-tk # For #1355
     - pkgconf
     - podman@4
     - python@3.8 # <-- required for VTK@8.2.1a later
@@ -209,7 +209,7 @@ spack:
     - python@3.12
     - py-ipython
     - qt@5.15 # QT version that matches paraview, might as well install this since we will build it...
-    #- r+X
+    - r+X
     - readline
     - rsync
     - ruby
@@ -263,8 +263,28 @@ spack compilers
     && spack mirror add my_mirror file://${HOME}/.spack/my_mirror \
     && spack mirror list
 
-spack concretize --fresh \
-    || exit 1
+cat <<EOF
+ -------------------------------------------------------------------------------
+| ${spack_env} - phase 1 - installing base packages with ${spack_core_compiler}
+ -------------------------------------------------------------------------------
+EOF
+spack concretize --fresh || exit 1
+
+# populate our source cache mirror
+spack mirror create --directory ${spack_source_cache} --all
+
+# run a number of installs in the background
+build_spack_pkgs
+
+cat <<EOF
+ -------------------------------------------------------------------------------
+| ${spack_env} - phase 2 - installing additional base packages with ${spack_core_compiler}
+ -------------------------------------------------------------------------------
+EOF
+spack add \
+      gimp ~jpegxl
+
+spack concretize --fresh || exit 1
 
 # populate our source cache mirror
 spack mirror create --directory ${spack_source_cache} --all
