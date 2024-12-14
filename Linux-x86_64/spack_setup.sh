@@ -130,6 +130,23 @@ EOF
 [ ! -d ${spack_clone_path} ] \
     && ${spack_clone_command} ${spack_clone_path}
 
+# shell function to mark all 'root' specs in the current environment also 'explicit'
+# this should be sufficient to make sure we get a module file for all roots.
+# (not clear why there are some roots that become implicit - noted in v0.22.x +)
+mark_all_roots_explicit() {
+
+    echo "Ensuring all root specs are also explicit..."
+
+    while read pkg_hash; do
+        #echo ${pkg_hash}
+        #spack spec -L "/${pkg_hash}"
+        spack mark --explicit "/${pkg_hash}"
+        #sleep 5
+        #echo
+    done < <(spack find --only-roots -L | grep '\[+\]' | awk '{print $2}')
+}
+
+
 # spack supports Lmod, but having Lmod in our shell environment *before* invoking spack is a recipe for trouble.
 # below is an attempt to 'sanitize' our shell from the broader FSL Lmod
 type module >/dev/null 2>&1 \
@@ -141,6 +158,8 @@ type module >/dev/null 2>&1 \
 # shell function to clean/refresh module tree,
 # passing along any additional arguments
 my_spack_refresh_lmod() {
+
+    mark_all_roots_explicit
 
     echo "Refreshing lmod modules at ${spack_lmod_root}"
 
