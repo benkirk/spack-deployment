@@ -25,9 +25,9 @@ create_and_activate_spack_env || exit 1
 # COMPS is a bash array of compilers to use.
 unset PPKGS
 unset MPIS
-# serial VTK, with system gcc
-COMPS=(${spack_system_compiler})
-SPKGS=('vtk@=8.2.1a~ffmpeg~mpi+qt+python')
+# serial VTK, with core gcc
+COMPS=(${spack_core_compiler})
+SPKGS=('vtk@9~ffmpeg~mpi+qt+python')
 comp_spkg_loop
 
 # --- END app-specific stuff
