@@ -141,7 +141,6 @@ type module >/dev/null 2>&1 \
              BASH_FUNC__module_raw BASH_FUNC_switchml BASH_FUNC_scl BASH_FUNC_ml \
              LMOD_SETTARG_FULL_SUPPORT MODULES_RUN_QUARANTINE \
              LMOD_SITE_MODULEPATH MODULES_CMD \
-    && unset -f $(compgen -A function) \
     && unset $(compgen -v | egrep "LMOD|MODU|Modu") \
     && env | egrep "LMOD|MODU|Modu" | sort
 
